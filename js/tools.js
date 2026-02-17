@@ -57,7 +57,10 @@ const Tools = (() => {
 
   function getTool() { return currentTool; }
   function getShapes() { return shapes; }
-  function setShapes(s) { shapes = s; }
+  function setShapes(s) {
+    shapes = Array.isArray(s) ? s : [];
+    selectedIds.clear();
+  }
   function getSelectedIds() { return selectedIds; }
   function getSelectionRect() { return selectionRect; }
 

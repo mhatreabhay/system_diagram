@@ -77,7 +77,8 @@
 
   // Load autosaved data
   const saved = Export.autoLoad();
-  if (saved && saved.length > 0) {
+  if (saved && Array.isArray(saved) && saved.length > 0) {
+    Connectors.resolveAllBindings(saved);
     Tools.setShapes(saved);
     History.push(saved);
   }
@@ -185,6 +186,7 @@
     if (e.target.files[0]) {
       Export.fromJSON(e.target.files[0], (shapes) => {
         History.push(Tools.getShapes());
+        Connectors.resolveAllBindings(shapes);
         Tools.setShapes(shapes);
         Tools.redraw();
       });

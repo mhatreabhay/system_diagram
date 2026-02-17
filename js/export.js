@@ -53,29 +53,51 @@ const Export = (() => {
   }
 
   /**
-   * Draw a shape to an arbitrary context (for export)
+   * Draw a shape to an arbitrary context (for export).
+   * Mirrors CanvasView.drawShape() so exported PNGs match on-screen rendering.
    */
   function drawShapeToCtx(ctx, rc, shape) {
+    // Resolve fill style exactly like canvas.js
+    const fillStyle = shape.shapeFillStyle || 'none';
+    const hasFill = fillStyle !== 'none' && shape.fillColor && shape.fillColor !== 'transparent';
+
     const opts = {
       stroke: shape.strokeColor,
       strokeWidth: shape.strokeWidth,
-      fill: shape.fillColor !== 'transparent' ? shape.fillColor : undefined,
-      fillStyle: shape.fillColor !== 'transparent' ? 'hachure' : undefined,
+      fill: hasFill ? shape.fillColor : undefined,
+      fillStyle: hasFill ? (fillStyle === 'solid' ? 'solid' : fillStyle) : undefined,
       roughness: 1.2,
       seed: shape.seed,
     };
+
+    // Stroke dash pattern
+    const dash = shape.strokeDash || 'solid';
+    if (dash !== 'solid') {
+      const sw = shape.strokeWidth || 2;
+      switch (dash) {
+        case 'dashed':   opts.strokeLineDash = [sw * 5, sw * 3]; break;
+        case 'dotted':   opts.strokeLineDash = [sw * 1.2, sw * 2.5]; break;
+        case 'dashdot':  opts.strokeLineDash = [sw * 5, sw * 2, sw * 1.2, sw * 2]; break;
+      }
+    }
 
     ctx.globalAlpha = shape.opacity || 1;
 
     switch (shape.type) {
       case 'rectangle':
-        rc.rectangle(shape.x, shape.y, shape.width, shape.height, opts);
+        if (shape.edgeStyle === 'round') {
+          _exportRoundedRect(rc, shape.x, shape.y, shape.width, shape.height, Math.min(12, Math.min(shape.width, shape.height) * 0.2), opts);
+        } else {
+          rc.rectangle(shape.x, shape.y, shape.width, shape.height, opts);
+        }
+        _exportShapeText(ctx, shape);
         break;
 
       case 'ellipse': {
         const cx = shape.x + shape.width / 2;
         const cy = shape.y + shape.height / 2;
         rc.ellipse(cx, cy, shape.width, shape.height, opts);
+        _exportShapeText(ctx, shape);
         break;
       }
 
@@ -88,6 +110,7 @@ const Export = (() => {
           [cx, cy - hh], [cx + hw, cy],
           [cx, cy + hh], [cx - hw, cy],
         ], opts);
+        _exportShapeText(ctx, shape);
         break;
       }
 
@@ -128,9 +151,661 @@ const Export = (() => {
         }
         ctx.restore();
         break;
+
+      // ---------- System-design shapes ----------
+
+      case 'database':
+        _exportDatabase(ctx, rc, shape, opts);
+        break;
+
+      case 'queue':
+        _exportQueue(ctx, rc, shape, opts);
+        break;
+
+      case 'cache':
+        _exportCache(ctx, rc, shape, opts);
+        break;
+
+      case 'server':
+        _exportServer(ctx, rc, shape, opts);
+        break;
+
+      case 'cloud':
+        _exportCloud(ctx, rc, shape, opts);
+        break;
+
+      case 'firewall':
+        _exportFirewall(ctx, rc, shape, opts);
+        break;
+
+      case 'loadbalancer':
+        _exportLoadBalancer(ctx, rc, shape, opts);
+        break;
+
+      case 'apigateway':
+        _exportApiGateway(ctx, rc, shape, opts);
+        break;
+
+      case 'cdn':
+        _exportCdn(ctx, rc, shape, opts);
+        break;
+
+      case 'user':
+        _exportUser(ctx, rc, shape, opts);
+        break;
+
+      case 'microservice':
+        _exportMicroservice(ctx, rc, shape, opts);
+        break;
+
+      case 'pubsub':
+        _exportPubSub(ctx, rc, shape, opts);
+        break;
+
+      case 'storage':
+        _exportStorage(ctx, rc, shape, opts);
+        break;
+
+      case 'function':
+        _exportFunction(ctx, rc, shape, opts);
+        break;
+
+      case 'container':
+        _exportContainer(ctx, rc, shape, opts);
+        break;
+
+      case 'eventbus':
+        _exportEventBus(ctx, rc, shape, opts);
+        break;
+
+      case 'browser':
+        _exportBrowser(ctx, rc, shape, opts);
+        break;
+
+      case 'mobile':
+        _exportMobile(ctx, rc, shape, opts);
+        break;
+
+      case 'monitor':
+        _exportMonitor(ctx, rc, shape, opts);
+        break;
+
+      case 'notification':
+        _exportNotification(ctx, rc, shape, opts);
+        break;
+
+      case 'auth':
+        _exportAuth(ctx, rc, shape, opts);
+        break;
+
+      case 'externalapi':
+        _exportExternalApi(ctx, rc, shape, opts);
+        break;
+
+      case 'scheduler':
+        _exportScheduler(ctx, rc, shape, opts);
+        break;
+
+      case 'logger':
+        _exportLogger(ctx, rc, shape, opts);
+        break;
+
+      case 'search':
+        _exportSearch(ctx, rc, shape, opts);
+        break;
+
+      case 'datawarehouse':
+        _exportDataWarehouse(ctx, rc, shape, opts);
+        break;
     }
 
     ctx.globalAlpha = 1;
+  }
+
+  // === Export helpers (mirror canvas.js renderers) ===
+
+  function _exportRoundedRect(rc, x, y, w, h, r, opts) {
+    r = Math.min(r, w / 2, h / 2);
+    const path = `M ${x + r} ${y}
+      L ${x + w - r} ${y}
+      A ${r} ${r} 0 0 1 ${x + w} ${y + r}
+      L ${x + w} ${y + h - r}
+      A ${r} ${r} 0 0 1 ${x + w - r} ${y + h}
+      L ${x + r} ${y + h}
+      A ${r} ${r} 0 0 1 ${x} ${y + h - r}
+      L ${x} ${y + r}
+      A ${r} ${r} 0 0 1 ${x + r} ${y}
+      Z`;
+    rc.path(path, opts);
+  }
+
+  function _exportBaseRect(rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    const r = Math.min(12, Math.min(w, h) * 0.2);
+    if (shape.edgeStyle === 'round') {
+      _exportRoundedRect(rc, x, y, w, h, r, opts);
+    } else {
+      rc.rectangle(x, y, w, h, opts);
+    }
+  }
+
+  function _exportShapeText(ctx, shape) {
+    if (!shape.text) return;
+    ctx.save();
+    const fs = shape.fontSize || 16;
+    ctx.font = `${fs}px ${shape.fontFamily || 'Segoe UI, system-ui, sans-serif'}`;
+    ctx.fillStyle = shape.strokeColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const lines = shape.text.split('\n');
+    const lineHeight = fs * 1.4;
+    const totalTextH = lines.length * lineHeight;
+    const cx = shape.x + shape.width / 2;
+    const pad = 6;
+    let startY;
+    const vAlign = shape.textVAlign || 'middle';
+    if (vAlign === 'top') {
+      startY = shape.y + pad;
+    } else if (vAlign === 'bottom') {
+      startY = shape.y + shape.height - totalTextH - pad;
+    } else {
+      startY = shape.y + (shape.height - totalTextH) / 2;
+    }
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], cx, startY + i * lineHeight);
+    }
+    ctx.restore();
+  }
+
+  function _exportIcon(ctx, shape, icon, color) {
+    ctx.save();
+    const fs = Math.min(16, Math.min(shape.width, shape.height) * 0.25);
+    ctx.font = `${fs}px Segoe UI, system-ui, sans-serif`;
+    ctx.fillStyle = color || '#666';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillText(icon, shape.x + shape.width - 6, shape.y + 5);
+    ctx.restore();
+  }
+
+  function _exportDatabase(ctx, rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    const ry = Math.min(h * 0.15, 20);
+    if (opts.fill) {
+      ctx.save();
+      ctx.fillStyle = opts.fill;
+      ctx.beginPath();
+      ctx.ellipse(x + w / 2, y + ry, w / 2, ry, 0, Math.PI, Math.PI * 2);
+      ctx.lineTo(x + w, y + h - ry);
+      ctx.ellipse(x + w / 2, y + h - ry, w / 2, ry, 0, 0, Math.PI);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    rc.ellipse(x + w / 2, y + ry, w, ry * 2, { ...opts, fill: opts.fill, fillStyle: opts.fill ? 'hachure' : undefined });
+    rc.line(x, y + ry, x, y + h - ry, opts);
+    rc.line(x + w, y + ry, x + w, y + h - ry, opts);
+    const steps = 30;
+    for (let i = 0; i < steps; i++) {
+      const a1 = (i / steps) * Math.PI;
+      const a2 = ((i + 1) / steps) * Math.PI;
+      rc.line(
+        x + w / 2 + (w / 2) * Math.cos(a1), y + h - ry + ry * Math.sin(a1),
+        x + w / 2 + (w / 2) * Math.cos(a2), y + h - ry + ry * Math.sin(a2),
+        opts
+      );
+    }
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportQueue(ctx, rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    _exportBaseRect(rc, shape, opts);
+    const slots = 3;
+    const slotW = w / (slots + 1);
+    for (let i = 1; i <= slots; i++) {
+      rc.line(x + slotW * i, y + 4, x + slotW * i, y + h - 4, { ...opts, fill: undefined });
+    }
+    const arrowY = y + h / 2;
+    const arrowX1 = x + w + 6;
+    const arrowX2 = x + w + 18;
+    rc.line(arrowX1, arrowY, arrowX2, arrowY, opts);
+    rc.line(arrowX2 - 5, arrowY - 4, arrowX2, arrowY, opts);
+    rc.line(arrowX2 - 5, arrowY + 4, arrowX2, arrowY, opts);
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportCache(ctx, rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    _exportBaseRect(rc, shape, opts);
+    const ix = x + w - 18;
+    const iy = y + 6;
+    const s = Math.min(14, h * 0.25);
+    ctx.save();
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = shape.strokeWidth || 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(ix + s * 0.5, iy);
+    ctx.lineTo(ix, iy + s * 0.55);
+    ctx.lineTo(ix + s * 0.4, iy + s * 0.5);
+    ctx.lineTo(ix + s * 0.1, iy + s);
+    ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportServer(ctx, rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    _exportBaseRect(rc, shape, opts);
+    const lineCount = Math.min(3, Math.floor(h / 20));
+    const gap = h / (lineCount + 1);
+    for (let i = 1; i <= lineCount; i++) {
+      const ly = y + gap * i;
+      rc.line(x + 6, ly, x + w - 6, ly, { ...opts, fill: undefined });
+      ctx.save();
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(x + w - 14, ly - gap * 0.25, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportCloud(ctx, rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    const path = [
+      `M ${x + w * 0.15} ${y + h * 0.78}`,
+      `C ${x - w * 0.02} ${y + h * 0.78}, ${x - w * 0.02} ${y + h * 0.42}, ${x + w * 0.12} ${y + h * 0.42}`,
+      `C ${x + w * 0.04} ${y + h * 0.18}, ${x + w * 0.24} ${y + h * 0.06}, ${x + w * 0.38} ${y + h * 0.18}`,
+      `C ${x + w * 0.38} ${y - h * 0.02}, ${x + w * 0.64} ${y - h * 0.02}, ${x + w * 0.68} ${y + h * 0.18}`,
+      `C ${x + w * 0.82} ${y + h * 0.06}, ${x + w * 0.98} ${y + h * 0.22}, ${x + w * 0.92} ${y + h * 0.42}`,
+      `C ${x + w * 1.04} ${y + h * 0.48}, ${x + w * 1.02} ${y + h * 0.78}, ${x + w * 0.85} ${y + h * 0.78}`,
+      `Z`
+    ].join(' ');
+    rc.path(path, opts);
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportFirewall(ctx, rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    _exportBaseRect(rc, shape, opts);
+    ctx.save();
+    ctx.strokeStyle = opts.stroke || '#1e1e1e';
+    ctx.lineWidth = (shape.strokeWidth || 2) * 0.6;
+    ctx.globalAlpha = 0.3;
+    const brickH = Math.max(10, h / 4);
+    const brickW = Math.max(16, w / 3);
+    for (let row = 0; row < Math.ceil(h / brickH); row++) {
+      const ly = y + row * brickH;
+      if (ly > y && ly < y + h) {
+        ctx.beginPath();
+        ctx.moveTo(x + 3, ly);
+        ctx.lineTo(x + w - 3, ly);
+        ctx.stroke();
+      }
+      const offset = (row % 2) * (brickW / 2);
+      for (let col = 0; col < Math.ceil(w / brickW) + 1; col++) {
+        const lx = x + col * brickW + offset;
+        if (lx > x + 3 && lx < x + w - 3) {
+          const topY = ly;
+          const botY = Math.min(ly + brickH, y + h);
+          ctx.beginPath();
+          ctx.moveTo(lx, Math.max(topY, y + 3));
+          ctx.lineTo(lx, botY - 3);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportLoadBalancer(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = Math.max(1.5, (shape.strokeWidth || 2) * 0.8);
+    ctx.lineCap = 'round';
+    const cx = x + w - 18, cy = y + 8, s = Math.min(12, h * 0.2);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + s);
+    ctx.lineTo(cx, cy + s * 0.4);
+    ctx.lineTo(cx - s * 0.5, cy);
+    ctx.moveTo(cx, cy + s * 0.4);
+    ctx.lineTo(cx + s * 0.5, cy);
+    ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportApiGateway(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#8b5cf6';
+    ctx.lineWidth = Math.max(1.5, (shape.strokeWidth || 2) * 0.8);
+    ctx.lineCap = 'round';
+    const ix = x + w - 20, iy = y + 7, s = Math.min(12, h * 0.2);
+    ctx.beginPath();
+    ctx.moveTo(ix, iy); ctx.lineTo(ix, iy + s);
+    ctx.moveTo(ix + s, iy); ctx.lineTo(ix + s, iy + s);
+    ctx.moveTo(ix - 2, iy + s * 0.5); ctx.lineTo(ix + s + 2, iy + s * 0.5);
+    ctx.moveTo(ix + s - 2, iy + s * 0.3); ctx.lineTo(ix + s + 2, iy + s * 0.5);
+    ctx.moveTo(ix + s - 2, iy + s * 0.7); ctx.lineTo(ix + s + 2, iy + s * 0.5);
+    ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportCdn(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#06b6d4';
+    ctx.lineWidth = Math.max(1, (shape.strokeWidth || 2) * 0.6);
+    const cx = x + w - 15, cy = y + 13, r = Math.min(7, h * 0.12);
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx, cy, r * 0.45, r, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportUser(ctx, rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    rc.ellipse(x + w / 2, y + h * 0.65, w * 0.8, h * 0.55, opts);
+    const headR = Math.min(w, h) * 0.28;
+    rc.ellipse(x + w / 2, y + h * 0.25, headR, headR, { ...opts, fill: opts.fill || undefined });
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportMicroservice(ctx, rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    const cx = x + w / 2, cy = y + h / 2;
+    const rx = w / 2, ry = h / 2;
+    rc.polygon([
+      [cx - rx, cy],
+      [cx - rx * 0.5, cy - ry],
+      [cx + rx * 0.5, cy - ry],
+      [cx + rx, cy],
+      [cx + rx * 0.5, cy + ry],
+      [cx - rx * 0.5, cy + ry],
+    ], opts);
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportPubSub(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#ec4899';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const cx = x + w - 16, cy = y + 12, r = Math.min(5, h * 0.08);
+    ctx.beginPath(); ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+    ctx.fillStyle = '#ec4899'; ctx.fill();
+    for (let i = 1; i <= 2; i++) {
+      ctx.beginPath(); ctx.arc(cx, cy, r * i, -Math.PI * 0.4, Math.PI * 0.4); ctx.stroke();
+    }
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportStorage(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#f97316';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const ix = x + w - 18, iy = y + 5, iw = 12, ih = 14;
+    ctx.beginPath(); ctx.ellipse(ix + iw / 2, iy + 3, iw / 2, 3, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ix, iy + 3); ctx.lineTo(ix, iy + ih - 3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ix + iw, iy + 3); ctx.lineTo(ix + iw, iy + ih - 3); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(ix + iw / 2, iy + ih - 3, iw / 2, 3, 0, 0, Math.PI); ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportFunction(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportIcon(ctx, shape, '\u03BB', '#e11d48');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportContainer(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const ix = x + w - 20, iy = y + 5, s = Math.min(13, h * 0.2);
+    ctx.beginPath(); ctx.rect(ix, iy + s * 0.25, s * 0.7, s * 0.7); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(ix, iy + s * 0.25); ctx.lineTo(ix + s * 0.3, iy);
+    ctx.lineTo(ix + s, iy); ctx.lineTo(ix + s * 0.7, iy + s * 0.25); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(ix + s * 0.7, iy + s * 0.25); ctx.lineTo(ix + s, iy);
+    ctx.lineTo(ix + s, iy + s * 0.7); ctx.lineTo(ix + s * 0.7, iy + s * 0.95); ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportEventBus(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#a855f7';
+    ctx.lineWidth = Math.max(1.5, (shape.strokeWidth || 2) * 0.7);
+    ctx.lineCap = 'round';
+    const gap = Math.min(5, h * 0.08);
+    const ix = x + 8, iw = w - 16, iy = y + h - 12;
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath(); ctx.moveTo(ix, iy + i * gap);
+      ctx.lineTo(ix + iw, iy + i * gap); ctx.stroke();
+    }
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportBrowser(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    const barH = Math.min(14, h * 0.18);
+    rc.line(x + 4, y + barH, x + w - 4, y + barH, { ...opts, fill: undefined });
+    ctx.save();
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath(); ctx.arc(x + 8, y + barH / 2, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath(); ctx.arc(x + 16, y + barH / 2, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath(); ctx.arc(x + 24, y + barH / 2, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportMobile(ctx, rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    const r = Math.min(16, Math.min(w, h) * 0.25);
+    _exportRoundedRect(rc, x, y, w, h, r, opts);
+    rc.line(x + 6, y + 14, x + w - 6, y + 14, { ...opts, fill: undefined });
+    ctx.save();
+    ctx.strokeStyle = opts.stroke || '#1e1e1e';
+    ctx.lineWidth = 2; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x + w * 0.35, y + h - 6);
+    ctx.lineTo(x + w * 0.65, y + h - 6);
+    ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportMonitor(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = Math.max(1.5, (shape.strokeWidth || 2) * 0.7);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const gy = y + h - 14, gx = x + 8, gw = w - 16;
+    ctx.beginPath();
+    ctx.moveTo(gx, gy);
+    ctx.lineTo(gx + gw * 0.2, gy - 4);
+    ctx.lineTo(gx + gw * 0.35, gy + 2);
+    ctx.lineTo(gx + gw * 0.45, gy - 8);
+    ctx.lineTo(gx + gw * 0.55, gy + 3);
+    ctx.lineTo(gx + gw * 0.7, gy - 3);
+    ctx.lineTo(gx + gw * 0.85, gy + 1);
+    ctx.lineTo(gx + gw, gy);
+    ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportNotification(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    ctx.lineCap = 'round';
+    const cx = x + w - 15, cy = y + 8, s = Math.min(10, h * 0.15);
+    ctx.beginPath();
+    ctx.moveTo(cx - s * 0.4, cy + s);
+    ctx.lineTo(cx - s * 0.5, cy + s * 0.5);
+    ctx.quadraticCurveTo(cx - s * 0.5, cy - s * 0.2, cx, cy - s * 0.3);
+    ctx.quadraticCurveTo(cx + s * 0.5, cy - s * 0.2, cx + s * 0.5, cy + s * 0.5);
+    ctx.lineTo(cx + s * 0.4, cy + s);
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy + s + 2, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#f59e0b'; ctx.fill();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportAuth(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#0ea5e9';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const cx = x + w - 15, cy = y + 7, s = Math.min(10, h * 0.15);
+    ctx.beginPath(); ctx.rect(cx - s * 0.4, cy + s * 0.3, s * 0.8, s * 0.6); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy + s * 0.3, s * 0.3, Math.PI, 0); ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportExternalApi(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    ctx.lineCap = 'round';
+    const ix = x + w - 18, iy = y + 7, s = Math.min(10, h * 0.15);
+    ctx.beginPath();
+    ctx.moveTo(ix, iy); ctx.lineTo(ix, iy + s * 0.4);
+    ctx.moveTo(ix + s * 0.5, iy); ctx.lineTo(ix + s * 0.5, iy + s * 0.4);
+    ctx.moveTo(ix - s * 0.1, iy + s * 0.4); ctx.lineTo(ix + s * 0.6, iy + s * 0.4);
+    ctx.moveTo(ix + s * 0.25, iy + s * 0.4); ctx.lineTo(ix + s * 0.25, iy + s);
+    ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportScheduler(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#14b8a6';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const cx = x + w - 14, cy = y + 12, r = Math.min(7, h * 0.1);
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - r * 0.65);
+    ctx.moveTo(cx, cy); ctx.lineTo(cx + r * 0.5, cy + r * 0.2);
+    ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportLogger(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#78716c';
+    ctx.lineWidth = Math.max(1, (shape.strokeWidth || 2) * 0.5);
+    ctx.lineCap = 'round';
+    const ix = x + w - 20, iy = y + 6, s = Math.min(12, h * 0.18);
+    for (let i = 0; i < 3; i++) {
+      const lineW = i === 1 ? s * 0.6 : s;
+      ctx.beginPath();
+      ctx.moveTo(ix, iy + i * (s * 0.45));
+      ctx.lineTo(ix + lineW, iy + i * (s * 0.45));
+      ctx.stroke();
+    }
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportSearch(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#ea580c';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    ctx.lineCap = 'round';
+    const cx = x + w - 16, cy = y + 10, r = Math.min(5, h * 0.08);
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + r * 0.7, cy + r * 0.7);
+    ctx.lineTo(cx + r * 1.6, cy + r * 1.6);
+    ctx.stroke();
+    ctx.restore();
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportDataWarehouse(ctx, rc, shape, opts) {
+    const { x, y, width: w, height: h } = shape;
+    const ry = Math.min(h * 0.12, 16);
+    if (opts.fill) {
+      ctx.save();
+      ctx.fillStyle = opts.fill;
+      ctx.beginPath();
+      ctx.ellipse(x + w / 2, y + ry, w / 2, ry, 0, Math.PI, Math.PI * 2);
+      ctx.lineTo(x + w, y + h - ry);
+      ctx.ellipse(x + w / 2, y + h - ry, w / 2, ry, 0, 0, Math.PI);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    rc.ellipse(x + w / 2, y + ry, w, ry * 2, { ...opts, fill: opts.fill, fillStyle: opts.fill ? 'hachure' : undefined });
+    rc.line(x, y + ry, x, y + h - ry, opts);
+    rc.line(x + w, y + ry, x + w, y + h - ry, opts);
+    const steps = 20;
+    const midY = y + h * 0.5;
+    for (let i = 0; i < steps; i++) {
+      const a1 = (i / steps) * Math.PI;
+      const a2 = ((i + 1) / steps) * Math.PI;
+      rc.line(
+        x + w / 2 + (w / 2) * Math.cos(a1), midY + ry * 0.6 * Math.sin(a1),
+        x + w / 2 + (w / 2) * Math.cos(a2), midY + ry * 0.6 * Math.sin(a2),
+        { ...opts, fill: undefined }
+      );
+    }
+    for (let i = 0; i < steps; i++) {
+      const a1 = (i / steps) * Math.PI;
+      const a2 = ((i + 1) / steps) * Math.PI;
+      rc.line(
+        x + w / 2 + (w / 2) * Math.cos(a1), y + h - ry + ry * Math.sin(a1),
+        x + w / 2 + (w / 2) * Math.cos(a2), y + h - ry + ry * Math.sin(a2),
+        opts
+      );
+    }
+    _exportShapeText(ctx, shape);
   }
 
   function drawArrowHeadExport(ctx, fromX, fromY, toX, toY, color, strokeW) {

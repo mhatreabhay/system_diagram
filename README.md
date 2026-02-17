@@ -77,7 +77,7 @@ A toggle-able mode that unlocks a **library of system design components** — pr
 | **Persistence** | LocalStorage + JSON file export/import |
 | **Packaging** | Static files — no build step required |
 
-## Project Structure (Planned)
+## Project Structure
 
 ```
 system_draw/
@@ -91,21 +91,21 @@ system_draw/
 │   ├── shapes.js           # Shape model & hit-testing
 │   ├── connectors.js       # Arrow / connector logic
 │   ├── history.js          # Undo / redo stack
-│   ├── export.js           # PNG / SVG / JSON export
-│   ├── admin/
-│   │   ├── components.js   # System design component definitions
-│   │   ├── palette.js      # Component palette sidebar
-│   │   └── properties.js   # Properties panel for components
+│   ├── export.js           # PNG / JSON export
 │   └── utils.js            # Math helpers, geometry, colors
-├── assets/
-│   └── icons/              # SVG icons for toolbar & components
+├── docker/
+│   ├── Dockerfile          # Docker image definition (nginx:alpine)
+│   └── nginx.conf          # Nginx server configuration
 └── README.md
 ```
 
 ## Getting Started
 
+### Local Development
+
+No build step required — just serve the static files:
+
 ```bash
-# No build step — just serve the static files
 # Option 1: Python
 python -m http.server 8000
 
@@ -113,6 +113,27 @@ python -m http.server 8000
 npx serve .
 
 # Then open http://localhost:8000
+```
+
+### Docker
+
+Build and run with Docker:
+
+```bash
+# Build the image (run from project root)
+docker build -f docker/Dockerfile -t systemdraw .
+
+# Run the container
+docker run -d -p 8080:80 --name systemdraw systemdraw
+
+# Open http://localhost:8080
+```
+
+To stop and remove:
+
+```bash
+docker stop systemdraw
+docker rm systemdraw
 ```
 
 ## Roadmap
