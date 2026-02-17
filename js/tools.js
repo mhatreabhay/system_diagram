@@ -21,6 +21,9 @@ const Tools = (() => {
   // Live cursor position in world coords (for anchor hints)
   let cursorWorld = null;
 
+  // Timestamp when text editing started (to guard against premature blur)
+  let _textEditOpenedAt = 0;
+
   // Style state (synced from toolbar)
   let strokeColor = '#1e1e1e';
   let fillColor = '#ffffff';
@@ -619,15 +622,20 @@ const Tools = (() => {
 
   function handleTextClick(world) {
     const input = document.getElementById('textInput');
+    const canvasEl = document.getElementById('drawCanvas');
+    const canvasRect = canvasEl.getBoundingClientRect();
     const screen = CanvasView.worldToScreen(world.x, world.y);
 
     input.style.display = 'block';
-    input.style.left = (screen.x) + 'px';
-    input.style.top = (screen.y + 48) + 'px'; // offset for toolbar
+    input.style.left = (canvasRect.left + screen.x) + 'px';
+    input.style.top = (canvasRect.top + screen.y) + 'px';
+    input.style.width = '200px';
+    input.style.height = '';
     input.style.fontSize = (16 * CanvasView.getScale()) + 'px';
     input.style.textAlign = 'left';
     input.value = '';
-    input.focus();
+
+    _textEditOpenedAt = Date.now();
 
     editingTextShape = Shapes.create('text', {
       x: world.x,
@@ -638,10 +646,33 @@ const Tools = (() => {
     });
     _editingInShapeRef = null; // standalone text, not in-shape
 
-    input.onblur = () => finishTextEditing();
+    input.onblur = () => {
+      // Guard: ignore blur within 300ms of opening (browser click-cycle steals focus)
+      if (Date.now() - _textEditOpenedAt < 300) {
+        setTimeout(() => input.focus(), 0);
+        return;
+      }
+      finishTextEditing();
+    };
     input.onkeydown = (e) => {
       if (e.key === 'Escape') {
+        _textEditOpenedAt = 0; // allow blur to dismiss
         input.blur();
+      }
+      if (e.key === 'Enter' && !e.shiftKey) {
+        // If the current line (after cursor) is empty, finalize the text
+        const pos = input.selectionStart;
+        const val = input.value;
+        const lineStart = val.lastIndexOf('\n', pos - 1) + 1;
+        const currentLine = val.substring(lineStart, pos);
+        if (currentLine.trim() === '' && pos === val.length) {
+          e.preventDefault();
+          // Remove trailing empty line before finalizing
+          input.value = val.substring(0, lineStart > 0 ? lineStart - 1 : 0);
+          if (editingTextShape) editingTextShape.text = input.value;
+          _textEditOpenedAt = 0;
+          input.blur();
+        }
       }
     };
     input.oninput = () => {
@@ -649,6 +680,9 @@ const Tools = (() => {
         editingTextShape.text = input.value;
       }
     };
+
+    // Delay focus until after the full pointer event cycle completes
+    setTimeout(() => input.focus(), 100);
   }
 
   // Reference to the container shape being text-edited (null for standalone text)
@@ -664,30 +698,40 @@ const Tools = (() => {
     if (!Shapes.CONTAINER_TYPES.has(shape.type)) return;
 
     const input = document.getElementById('textInput');
+    const canvasEl = document.getElementById('drawCanvas');
+    const canvasRect = canvasEl.getBoundingClientRect();
     const b = Shapes.getBounds(shape);
     const scale = CanvasView.getScale();
     const screenTL = CanvasView.worldToScreen(b.x, b.y);
 
     input.style.display = 'block';
-    input.style.left = screenTL.x + 'px';
-    input.style.top = (screenTL.y + 48) + 'px';
+    input.style.left = (canvasRect.left + screenTL.x) + 'px';
+    input.style.top = (canvasRect.top + screenTL.y) + 'px';
     input.style.width = (b.w * scale) + 'px';
     input.style.height = (b.h * scale) + 'px';
     input.style.fontSize = ((shape.fontSize || 16) * scale) + 'px';
     input.style.textAlign = 'center';
     input.value = shape.text || '';
-    input.focus();
-    input.select();
 
+    _textEditOpenedAt = Date.now();
     _editingInShapeRef = shape;
     editingTextShape = null; // not creating a new text shape
 
-    input.onblur = () => _finishShapeTextEditing();
+    input.onblur = () => {
+      if (Date.now() - _textEditOpenedAt < 300) {
+        setTimeout(() => input.focus(), 0);
+        return;
+      }
+      _finishShapeTextEditing();
+    };
     input.onkeydown = (e) => {
       if (e.key === 'Escape') {
+        _textEditOpenedAt = 0;
         input.blur();
       }
     };
+
+    setTimeout(() => { input.focus(); input.select(); }, 100);
   }
 
   function _finishShapeTextEditing() {
