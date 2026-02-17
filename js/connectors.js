@@ -15,7 +15,7 @@ const Connectors = (() => {
    */
   function findNearestBoundaryPoint(shapes, worldX, worldY, excludeIds = []) {
     let best = null;
-    let bestDist = SNAP_DISTANCE;
+    let bestDist = Infinity;
 
     for (const shape of shapes) {
       if (excludeIds.includes(shape.id)) continue;
@@ -25,6 +25,11 @@ const Connectors = (() => {
       if (!bp) continue;
 
       const d = Utils.distance(worldX, worldY, bp.x, bp.y);
+
+      // Snap if cursor is within SNAP_DISTANCE of boundary OR inside the shape
+      const isInside = Shapes.hitTest(shape, worldX, worldY, 0);
+      if (!isInside && d >= SNAP_DISTANCE) continue;
+
       if (d < bestDist) {
         const b = Shapes.getBounds(shape);
         const cx = b.x + b.w / 2;
@@ -54,15 +59,18 @@ const Connectors = (() => {
       if (!bp) continue;
 
       const d = Utils.distance(worldX, worldY, bp.x, bp.y);
-      if (d < SNAP_DISTANCE * 1.5) {
+      const isInside = Shapes.hitTest(shape, worldX, worldY, 0);
+
+      if (isInside || d < SNAP_DISTANCE * 1.5) {
         ctx.save();
-        ctx.fillStyle = d < SNAP_DISTANCE ? '#6c47ff' : 'rgba(108,71,255,0.3)';
+        const canSnap = isInside || d < SNAP_DISTANCE;
+        ctx.fillStyle = canSnap ? '#6c47ff' : 'rgba(108,71,255,0.3)';
         ctx.beginPath();
         ctx.arc(bp.x, bp.y, 5 / scale, 0, Math.PI * 2);
         ctx.fill();
 
         // Subtle shape outline highlight to show which shape will connect
-        if (d < SNAP_DISTANCE) {
+        if (canSnap) {
           const b = Shapes.getBounds(shape);
           ctx.strokeStyle = 'rgba(108,71,255,0.25)';
           ctx.lineWidth = 2 / scale;
