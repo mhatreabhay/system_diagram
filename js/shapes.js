@@ -37,7 +37,7 @@ const Shapes = (() => {
       text: '',
       fontSize: 16,
       fontFamily: 'Segoe UI, system-ui, sans-serif',
-      textVAlign: 'middle', // 'top' | 'middle' | 'bottom'
+      textVAlign: 'bottom', // 'top' | 'middle' | 'bottom'
       // For arrow
       arrowHead: type === 'arrow',
       // Edge style: 'sharp' or 'round'

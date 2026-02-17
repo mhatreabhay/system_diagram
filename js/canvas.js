@@ -497,11 +497,11 @@ const CanvasView = (() => {
     } else {
       rc.rectangle(x, y, w, h, opts);
     }
-    // Brick pattern
+    // Brick pattern — red bricks
     ctx.save();
-    ctx.strokeStyle = opts.stroke || '#1e1e1e';
-    ctx.lineWidth = (shape.strokeWidth || 2) * 0.6;
-    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = '#cc3333';   // red brick lines
+    ctx.lineWidth = (shape.strokeWidth || 2) * 0.7;
+    ctx.globalAlpha = 0.5;
     const brickH = Math.max(10, h / 4);
     const brickW = Math.max(16, w / 3);
     for (let row = 0; row < Math.ceil(h / brickH); row++) {
@@ -961,7 +961,7 @@ const CanvasView = (() => {
     const pad = 6;
 
     let startY;
-    const vAlign = shape.textVAlign || 'middle';
+    const vAlign = shape.textVAlign || 'bottom';
     if (vAlign === 'top') {
       startY = shape.y + pad;
     } else if (vAlign === 'bottom') {

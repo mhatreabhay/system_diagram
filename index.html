@@ -166,8 +166,82 @@
 
   <!-- Main container -->
   <div id="mainContainer">
+    <!-- Left Shape Ribbon -->
+    <div id="shapeRibbon">
+      <div class="ribbon-category" data-category="data">
+        <div class="ribbon-icon" title="Data">🗃</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Data</div>
+          <button class="ribbon-item" data-systool="database" data-label="Database">🗃 Database</button>
+          <button class="ribbon-item" data-systool="cache" data-label="Cache">&#9889; Cache</button>
+          <button class="ribbon-item" data-systool="storage" data-label="Storage">📦 Storage</button>
+          <button class="ribbon-item" data-systool="datawarehouse" data-label="Data Warehouse">🏢 Data Warehouse</button>
+          <button class="ribbon-item" data-systool="search" data-label="Search">🔍 Search</button>
+        </div>
+      </div>
+      <div class="ribbon-category" data-category="compute">
+        <div class="ribbon-icon" title="Compute">&#9881;</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Compute</div>
+          <button class="ribbon-item" data-systool="server" data-label="Server">&#9881; Server</button>
+          <button class="ribbon-item" data-systool="microservice" data-label="Microservice">&#11047; Microservice</button>
+          <button class="ribbon-item" data-systool="function" data-label="Function">&lambda; Function</button>
+          <button class="ribbon-item" data-systool="container" data-label="Container">📦 Container</button>
+        </div>
+      </div>
+      <div class="ribbon-category" data-category="network">
+        <div class="ribbon-icon" title="Network">🌐</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Network</div>
+          <button class="ribbon-item" data-systool="loadbalancer" data-label="Load Balancer">&#9878; Load Balancer</button>
+          <button class="ribbon-item" data-systool="apigateway" data-label="API Gateway">🔧 API Gateway</button>
+          <button class="ribbon-item" data-systool="cdn" data-label="CDN">🌐 CDN</button>
+          <button class="ribbon-item" data-systool="cloud" data-label="Cloud">&#9729; Cloud</button>
+          <button class="ribbon-item" data-systool="firewall" data-label="Firewall">🛡 Firewall</button>
+        </div>
+      </div>
+      <div class="ribbon-category" data-category="messaging">
+        <div class="ribbon-icon" title="Messaging">📨</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Messaging</div>
+          <button class="ribbon-item" data-systool="queue" data-label="Queue">&#10145; Queue</button>
+          <button class="ribbon-item" data-systool="pubsub" data-label="Pub/Sub">📣 Pub/Sub</button>
+          <button class="ribbon-item" data-systool="eventbus" data-label="Event Bus">📨 Event Bus</button>
+        </div>
+      </div>
+      <div class="ribbon-category" data-category="clients">
+        <div class="ribbon-icon" title="Clients">👤</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Clients</div>
+          <button class="ribbon-item" data-systool="user" data-label="User">👤 User</button>
+          <button class="ribbon-item" data-systool="browser" data-label="Browser">🌐 Browser</button>
+          <button class="ribbon-item" data-systool="mobile" data-label="Mobile">📱 Mobile</button>
+        </div>
+      </div>
+      <div class="ribbon-category" data-category="ops">
+        <div class="ribbon-icon" title="Ops">📈</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Ops</div>
+          <button class="ribbon-item" data-systool="monitor" data-label="Monitor">📈 Monitor</button>
+          <button class="ribbon-item" data-systool="logger" data-label="Logger">📜 Logger</button>
+          <button class="ribbon-item" data-systool="scheduler" data-label="Scheduler">&#9202; Scheduler</button>
+        </div>
+      </div>
+      <div class="ribbon-category" data-category="security">
+        <div class="ribbon-icon" title="Security & Integration">🔒</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Security & Integration</div>
+          <button class="ribbon-item" data-systool="notification" data-label="Notification">🔔 Notification</button>
+          <button class="ribbon-item" data-systool="auth" data-label="Auth">🔒 Auth</button>
+          <button class="ribbon-item" data-systool="externalapi" data-label="External API">🔗 External API</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Canvas -->
-    <canvas id="drawCanvas"></canvas>
+    <div id="canvasWrapper">
+      <canvas id="drawCanvas"></canvas>
+    </div>
 
     <!-- Right Style Panel -->
     <div id="stylePanel" class="style-panel">
@@ -250,7 +324,7 @@
                 <line x1="16" y1="8" x2="12" y2="4"/>
               </svg>
             </button>
-            <button class="panel-icon-btn align-btn active" data-valign="middle" title="Align Middle">
+            <button class="panel-icon-btn align-btn" data-valign="middle" title="Align Middle">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="4" y1="12" x2="20" y2="12"/>
                 <line x1="12" y1="6" x2="12" y2="18"/>
@@ -258,7 +332,7 @@
                 <polyline points="8 15 12 18 16 15"/>
               </svg>
             </button>
-            <button class="panel-icon-btn align-btn" data-valign="bottom" title="Align Bottom">
+            <button class="panel-icon-btn align-btn active" data-valign="bottom" title="Align Bottom">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="4" y1="20" x2="20" y2="20"/>
                 <line x1="12" y1="6" x2="12" y2="20"/>

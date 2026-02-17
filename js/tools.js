@@ -175,14 +175,25 @@ const Tools = (() => {
       case 'scheduler':
       case 'logger':
       case 'search':
-      case 'datawarehouse':
+      case 'datawarehouse': {
+        // Firewall gets default red color scheme
+        let shapeStroke = strokeColor;
+        let shapeFill = fillEnabled ? fillColor : 'transparent';
+        let shapeFillSt = shapeFillStyle;
+        if (currentTool === 'firewall') {
+          shapeStroke = '#8b0000';        // dark red border
+          shapeFill = '#fde8e8';           // light red background
+          shapeFillSt = 'solid';
+        }
         drawingShape = Shapes.create(currentTool, {
           x: world.x, y: world.y,
           width: 0, height: 0,
-          strokeColor,
-          fillColor: fillEnabled ? fillColor : 'transparent',
-          strokeWidth, edgeStyle, strokeDash, shapeFillStyle,
+          strokeColor: shapeStroke,
+          fillColor: shapeFill,
+          strokeWidth, edgeStyle, strokeDash,
+          shapeFillStyle: shapeFillSt,
         });
+      }
         isDragging = true;
         dragType = 'draw';
         break;
