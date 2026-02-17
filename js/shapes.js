@@ -160,7 +160,25 @@ const Shapes = (() => {
       case 'queue':
       case 'cache':
       case 'server':
-      case 'firewall': {
+      case 'firewall':
+      case 'loadbalancer':
+      case 'apigateway':
+      case 'cdn':
+      case 'pubsub':
+      case 'storage':
+      case 'function':
+      case 'container':
+      case 'eventbus':
+      case 'browser':
+      case 'mobile':
+      case 'monitor':
+      case 'notification':
+      case 'auth':
+      case 'externalapi':
+      case 'scheduler':
+      case 'logger':
+      case 'search':
+      case 'datawarehouse': {
         return Utils.pointInRect(px, py,
           b.x - tolerance, b.y - tolerance,
           b.w + tolerance * 2, b.h + tolerance * 2);
@@ -170,6 +188,20 @@ const Shapes = (() => {
         const ccx = b.x + b.w / 2;
         const ccy = b.y + b.h / 2;
         return Utils.pointInEllipse(px, py, ccx, ccy,
+          b.w / 2 + tolerance, b.h / 2 + tolerance);
+      }
+
+      case 'user': {
+        const ucx = b.x + b.w / 2;
+        const ucy = b.y + b.h / 2;
+        return Utils.pointInEllipse(px, py, ucx, ucy,
+          b.w / 2 + tolerance, b.h / 2 + tolerance);
+      }
+
+      case 'microservice': {
+        const mcx = b.x + b.w / 2;
+        const mcy = b.y + b.h / 2;
+        return Utils.pointInDiamond(px, py, mcx, mcy,
           b.w / 2 + tolerance, b.h / 2 + tolerance);
       }
 
@@ -314,14 +346,35 @@ const Shapes = (() => {
       case 'cache':
       case 'server':
       case 'firewall':
+      case 'loadbalancer':
+      case 'apigateway':
+      case 'cdn':
+      case 'pubsub':
+      case 'storage':
+      case 'function':
+      case 'container':
+      case 'eventbus':
+      case 'browser':
+      case 'mobile':
+      case 'monitor':
+      case 'notification':
+      case 'auth':
+      case 'externalapi':
+      case 'scheduler':
+      case 'logger':
+      case 'search':
+      case 'datawarehouse':
         return _rayRectFromCenter(cx, cy, targetX, targetY, b.w / 2, b.h / 2);
       case 'ellipse':
       case 'cloud':
+      case 'user':
         return _rayEllipseFromCenter(cx, cy, targetX, targetY, b.w / 2, b.h / 2);
       case 'diamond':
+      case 'microservice':
         return _rayDiamondFromCenter(cx, cy, targetX, targetY, b.w / 2, b.h / 2);
       default:
-        return null;
+        // Fallback: treat as rectangle so unknown shapes can still be connected
+        return _rayRectFromCenter(cx, cy, targetX, targetY, b.w / 2, b.h / 2);
     }
   }
 
