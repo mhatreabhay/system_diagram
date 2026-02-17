@@ -23,6 +23,7 @@
   const exportJsonBtn = document.getElementById('exportJsonBtn');
   const importJsonBtn = document.getElementById('importJsonBtn');
   const importFileInput = document.getElementById('importFileInput');
+  const clearAllBtn = document.getElementById('clearAllBtn');
   const zoomInBtn = document.getElementById('zoomInBtn');
   const zoomOutBtn = document.getElementById('zoomOutBtn');
   const zoomResetBtn = document.getElementById('zoomResetBtn');
@@ -178,6 +179,16 @@
   undoBtn.addEventListener('click', () => Tools.undo());
   redoBtn.addEventListener('click', () => Tools.redo());
   deleteBtn.addEventListener('click', () => Tools.deleteSelected());
+
+  clearAllBtn.addEventListener('click', () => {
+    if (Tools.getShapes().length === 0) return;
+    if (confirm('Clear the entire canvas? This cannot be undone.')) {
+      History.push(Tools.getShapes());
+      Tools.setShapes([]);
+      Export.autoSave([]);
+      Tools.redraw();
+    }
+  });
 
   exportPngBtn.addEventListener('click', () => Export.toPNG(Tools.getShapes()));
   exportJsonBtn.addEventListener('click', () => Export.toJSON(Tools.getShapes()));
