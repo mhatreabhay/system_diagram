@@ -963,11 +963,13 @@ const CanvasView = (() => {
     let startY;
     const vAlign = shape.textVAlign || 'bottom';
     if (vAlign === 'top') {
-      startY = shape.y + pad;
+      // Outside, above the shape
+      startY = shape.y - totalTextH - pad;
     } else if (vAlign === 'bottom') {
-      startY = shape.y + shape.height - totalTextH - pad;
+      // Outside, below the shape
+      startY = shape.y + shape.height + pad;
     } else {
-      // middle
+      // Middle — inside shape, vertically centered
       startY = shape.y + (shape.height - totalTextH) / 2;
     }
 
