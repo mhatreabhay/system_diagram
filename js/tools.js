@@ -36,6 +36,10 @@ const Tools = (() => {
   // Pending label for system shapes (set before draw, applied after)
   let pendingShapeLabel = null;
 
+  // Internal clipboard for copy/paste
+  let clipboard = [];
+  let pasteCount = 0;
+
   // Text editing state
   let editingTextShape = null;
 
@@ -1000,6 +1004,53 @@ const Tools = (() => {
     redraw();
   }
 
+  /**
+   * Copy selected shapes to internal clipboard.
+   */
+  function copySelected() {
+    if (selectedIds.size === 0) return;
+    clipboard = [];
+    pasteCount = 0;
+    for (const id of selectedIds) {
+      const orig = shapes.find(s => s.id === id);
+      if (orig) clipboard.push(Utils.deepClone(orig));
+    }
+  }
+
+  /**
+   * Cut selected shapes (copy + delete).
+   */
+  function cutSelected() {
+    copySelected();
+    deleteSelected();
+  }
+
+  /**
+   * Paste shapes from internal clipboard.
+   * Each successive paste offsets by an additional 20px.
+   */
+  function pasteClipboard() {
+    if (clipboard.length === 0) return;
+    pasteCount++;
+    const offset = pasteCount * 20;
+    History.push(shapes);
+    const newIds = new Set();
+    for (const item of clipboard) {
+      const copy = Utils.deepClone(item);
+      copy.id = Utils.generateId();
+      copy.seed = Math.floor(Math.random() * 2147483647);
+      // Clear bindings — pasted shapes are independent
+      copy.startBinding = null;
+      copy.endBinding = null;
+      Shapes.move(copy, offset, offset);
+      shapes.push(copy);
+      newIds.add(copy.id);
+    }
+    selectedIds.clear();
+    for (const id of newIds) selectedIds.add(id);
+    redraw();
+  }
+
   function bringToFront() {
     if (selectedIds.size === 0) return;
     History.push(shapes);
@@ -1056,6 +1107,9 @@ const Tools = (() => {
     onPointerUp,
     deleteSelected,
     duplicateSelected,
+    copySelected,
+    cutSelected,
+    pasteClipboard,
     bringToFront,
     sendToBack,
     selectAll,

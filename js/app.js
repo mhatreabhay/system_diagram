@@ -70,8 +70,6 @@
       }
       // If switching back to select (e.g. after drawing), clear dropdown & ribbon highlights
       if (tool === 'select') {
-        dropdownItems.forEach(d => d.classList.remove('active'));
-        document.getElementById('shapesBtn').classList.remove('active');
         document.querySelectorAll('.ribbon-item').forEach(r => r.classList.remove('active'));
         document.querySelectorAll('.ribbon-category').forEach(c => c.classList.remove('active'));
       }
@@ -109,30 +107,6 @@
     });
   });
 
-  // === System Shapes Dropdown ===
-  const dropdownItems = document.querySelectorAll('.dropdown-item');
-
-  dropdownItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const systool = item.dataset.systool;
-      Tools.setPendingLabel(item.dataset.label || null);
-      Tools.setTool(systool);
-
-      // Highlight active dropdown item
-      dropdownItems.forEach(d => d.classList.remove('active'));
-      item.classList.add('active');
-
-      // Also highlight matching ribbon item
-      ribbonItems.forEach(r => r.classList.toggle('active', r.dataset.systool === systool));
-
-      // Mark the shapes button as active
-      const shapesBtn = document.getElementById('shapesBtn');
-      shapesBtn.classList.add('active');
-      // Clear active from other tool buttons
-      toolBtns.forEach(b => { if (b !== shapesBtn) b.classList.remove('active'); });
-    });
-  });
-
   // === Left Shape Ribbon ===
   const ribbonItems = document.querySelectorAll('.ribbon-item');
 
@@ -146,17 +120,12 @@
       ribbonItems.forEach(r => r.classList.remove('active'));
       item.classList.add('active');
 
-      // Also highlight matching dropdown item
-      dropdownItems.forEach(d => d.classList.toggle('active', d.dataset.systool === systool));
-
       // Highlight category
       document.querySelectorAll('.ribbon-category').forEach(c => c.classList.remove('active'));
       item.closest('.ribbon-category').classList.add('active');
 
-      // Mark the shapes button as active, clear other tool buttons
-      const shapesBtn = document.getElementById('shapesBtn');
-      shapesBtn.classList.add('active');
-      toolBtns.forEach(b => { if (b !== shapesBtn) b.classList.remove('active'); });
+      // Clear active from other tool buttons
+      toolBtns.forEach(b => b.classList.remove('active'));
     });
   });
 
@@ -164,11 +133,7 @@
 
   toolBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      if (btn.id === 'shapesBtn') return; // handled via dropdown
       Tools.setTool(btn.dataset.tool);
-      // Clear dropdown active state
-      dropdownItems.forEach(d => d.classList.remove('active'));
-      document.getElementById('shapesBtn').classList.remove('active');
       Tools.setPendingLabel(null);
     });
   });
@@ -355,6 +320,18 @@
           return;
         case 'a':
           Tools.selectAll();
+          e.preventDefault();
+          return;
+        case 'c':
+          Tools.copySelected();
+          e.preventDefault();
+          return;
+        case 'v':
+          Tools.pasteClipboard();
+          e.preventDefault();
+          return;
+        case 'x':
+          Tools.cutSelected();
           e.preventDefault();
           return;
         case 'd':
