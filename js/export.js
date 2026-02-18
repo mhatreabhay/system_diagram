@@ -277,6 +277,32 @@ const Export = (() => {
       case 'manageddisks':
         _exportManagedDisks(ctx, rc, shape, opts);
         break;
+
+      // Azure Database shapes
+      case 'azuresql':
+        _exportAzureSql(ctx, rc, shape, opts);
+        break;
+      case 'cosmosdb':
+        _exportCosmosDb(ctx, rc, shape, opts);
+        break;
+      case 'azuremysql':
+        _exportAzureMySql(ctx, rc, shape, opts);
+        break;
+      case 'azurepostgres':
+        _exportAzurePostgres(ctx, rc, shape, opts);
+        break;
+      case 'sqlmanaged':
+        _exportSqlManaged(ctx, rc, shape, opts);
+        break;
+      case 'rediscache':
+        _exportRedisCache(ctx, rc, shape, opts);
+        break;
+      case 'datafactory':
+        _exportDataFactory(ctx, rc, shape, opts);
+        break;
+      case 'synapse':
+        _exportSynapse(ctx, rc, shape, opts);
+        break;
     }
 
     ctx.globalAlpha = 1;
@@ -829,109 +855,98 @@ const Export = (() => {
   }
 
   // === Azure Storage export renderers ===
+  // Uses same AzureIcons cache (preloaded in canvas.js)
+
+  function _exportAzureIcon(ctx, shape, typeKey) {
+    const img = AzureIcons.get(typeKey);
+    if (!img || !img.complete || !img.naturalWidth) return;
+    const s = Math.min(24, Math.min(shape.width, shape.height) * 0.35);
+    ctx.drawImage(img, shape.x + shape.width - s - 4, shape.y + 4, s, s);
+  }
 
   function _exportBlobStorage(ctx, rc, shape, opts) {
     _exportBaseRect(rc, shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 18, iy = y + 5, r = 3;
-    ctx.beginPath(); ctx.arc(ix + 6, iy + 3, r, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(ix + 3, iy + 10, r, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(ix + 9, iy + 10, r, 0, Math.PI * 2); ctx.stroke();
-    ctx.restore();
+    _exportAzureIcon(ctx, shape, 'blobstorage');
     _exportShapeText(ctx, shape);
   }
 
   function _exportFileStorage(ctx, rc, shape, opts) {
     _exportBaseRect(rc, shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 18, iy = y + 5;
-    ctx.beginPath();
-    ctx.moveTo(ix, iy + 3); ctx.lineTo(ix, iy + 14); ctx.lineTo(ix + 14, iy + 14);
-    ctx.lineTo(ix + 14, iy + 3); ctx.lineTo(ix + 7, iy + 3);
-    ctx.lineTo(ix + 5, iy); ctx.lineTo(ix, iy); ctx.closePath(); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(ix, iy + 3); ctx.lineTo(ix + 14, iy + 3); ctx.stroke();
-    ctx.restore();
+    _exportAzureIcon(ctx, shape, 'filestorage');
     _exportShapeText(ctx, shape);
   }
 
   function _exportQueueStorage(ctx, rc, shape, opts) {
     _exportBaseRect(rc, shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 18, iy = y + 5;
-    for (let i = 0; i < 3; i++) {
-      const by = iy + i * 5;
-      ctx.beginPath(); ctx.rect(ix, by, 13, 3); ctx.stroke();
-    }
-    ctx.beginPath();
-    ctx.moveTo(ix + 3, iy + 15); ctx.lineTo(ix + 10, iy + 15);
-    ctx.moveTo(ix + 8, iy + 13); ctx.lineTo(ix + 10, iy + 15); ctx.lineTo(ix + 8, iy + 17);
-    ctx.stroke();
-    ctx.restore();
+    _exportAzureIcon(ctx, shape, 'queuestorage');
     _exportShapeText(ctx, shape);
   }
 
   function _exportTableStorage(ctx, rc, shape, opts) {
     _exportBaseRect(rc, shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 18, iy = y + 4;
-    ctx.beginPath(); ctx.rect(ix, iy, 14, 14); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(ix, iy + 5); ctx.lineTo(ix + 14, iy + 5); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(ix, iy + 9.5); ctx.lineTo(ix + 14, iy + 9.5); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(ix + 5, iy); ctx.lineTo(ix + 5, iy + 14); ctx.stroke();
-    ctx.restore();
+    _exportAzureIcon(ctx, shape, 'tablestorage');
     _exportShapeText(ctx, shape);
   }
 
   function _exportDataLake(ctx, rc, shape, opts) {
     _exportBaseRect(rc, shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 20, iy = y + 5;
-    for (let row = 0; row < 3; row++) {
-      const wy = iy + row * 5;
-      ctx.beginPath();
-      ctx.moveTo(ix, wy + 2);
-      ctx.bezierCurveTo(ix + 4, wy, ix + 8, wy + 4, ix + 12, wy + 2);
-      ctx.lineTo(ix + 15, wy + 2);
-      ctx.stroke();
-    }
-    ctx.restore();
+    _exportAzureIcon(ctx, shape, 'datalake');
     _exportShapeText(ctx, shape);
   }
 
   function _exportManagedDisks(ctx, rc, shape, opts) {
     _exportBaseRect(rc, shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 18, iy = y + 4;
-    const dw = 14, dh = 4;
-    for (let i = 0; i < 3; i++) {
-      const dy = iy + i * 5;
-      ctx.beginPath(); ctx.ellipse(ix + dw / 2, dy, dw / 2, dh / 2, 0, 0, Math.PI * 2); ctx.stroke();
-      if (i < 2) {
-        ctx.beginPath();
-        ctx.moveTo(ix, dy); ctx.lineTo(ix, dy + 5);
-        ctx.moveTo(ix + dw, dy); ctx.lineTo(ix + dw, dy + 5);
-        ctx.stroke();
-      }
-    }
-    ctx.restore();
+    _exportAzureIcon(ctx, shape, 'manageddisks');
+    _exportShapeText(ctx, shape);
+  }
+
+  // === Azure Database export renderers ===
+
+  function _exportAzureSql(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportAzureIcon(ctx, shape, 'azuresql');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportCosmosDb(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportAzureIcon(ctx, shape, 'cosmosdb');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportAzureMySql(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportAzureIcon(ctx, shape, 'azuremysql');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportAzurePostgres(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportAzureIcon(ctx, shape, 'azurepostgres');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportSqlManaged(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportAzureIcon(ctx, shape, 'sqlmanaged');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportRedisCache(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportAzureIcon(ctx, shape, 'rediscache');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportDataFactory(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportAzureIcon(ctx, shape, 'datafactory');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportSynapse(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportAzureIcon(ctx, shape, 'synapse');
     _exportShapeText(ctx, shape);
   }
 

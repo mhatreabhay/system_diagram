@@ -181,7 +181,15 @@ const Tools = (() => {
       case 'queuestorage':
       case 'tablestorage':
       case 'datalake':
-      case 'manageddisks': {
+      case 'manageddisks':
+      case 'azuresql':
+      case 'cosmosdb':
+      case 'azuremysql':
+      case 'azurepostgres':
+      case 'sqlmanaged':
+      case 'rediscache':
+      case 'datafactory':
+      case 'synapse': {
         // Firewall gets default red color scheme
         let shapeStroke = strokeColor;
         let shapeFill = fillEnabled ? fillColor : 'transparent';
@@ -415,7 +423,15 @@ const Tools = (() => {
       case 'queuestorage':
       case 'tablestorage':
       case 'datalake':
-      case 'manageddisks': {
+      case 'manageddisks':
+      case 'azuresql':
+      case 'cosmosdb':
+      case 'azuremysql':
+      case 'azurepostgres':
+      case 'sqlmanaged':
+      case 'rediscache':
+      case 'datafactory':
+      case 'synapse': {
         const bounds = Utils.normalizeBounds(
           dragStartWorld.x, dragStartWorld.y, world.x, world.y
         );

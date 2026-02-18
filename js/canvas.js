@@ -2,6 +2,37 @@
 // canvas.js — Canvas viewport (pan/zoom) and rendering engine
 // ============================================================
 
+// Azure icon image cache — preloaded SVGs
+const AzureIcons = (() => {
+  const _cache = {};
+  const _icons = {
+    blobstorage:    'icons/azure-storage/blob-storage.svg',
+    filestorage:    'icons/azure-storage/file-storage.svg',
+    queuestorage:   'icons/azure-storage/queue-storage.svg',
+    tablestorage:   'icons/azure-storage/table-storage.svg',
+    datalake:       'icons/azure-storage/data-lake.svg',
+    manageddisks:   'icons/azure-storage/managed-disks.svg',
+    // Azure Database
+    azuresql:       'icons/azure-database/azure-sql.svg',
+    cosmosdb:       'icons/azure-database/cosmos-db.svg',
+    azuremysql:     'icons/azure-database/mysql.svg',
+    azurepostgres:  'icons/azure-database/postgresql.svg',
+    sqlmanaged:     'icons/azure-database/sql-managed-instance.svg',
+    rediscache:     'icons/azure-database/redis-cache.svg',
+    datafactory:    'icons/azure-database/data-factory.svg',
+    synapse:        'icons/azure-database/synapse.svg',
+  };
+  // Preload all icons as Image objects
+  for (const [key, src] of Object.entries(_icons)) {
+    const img = new Image();
+    img.src = src;
+    _cache[key] = img;
+  }
+  /** Get preloaded image for a shape type (or null) */
+  function get(type) { return _cache[type] || null; }
+  return { get };
+})();
+
 const CanvasView = (() => {
   let canvas, ctx, rc; // rc = rough canvas
   let width, height;
@@ -358,6 +389,32 @@ const CanvasView = (() => {
         break;
       case 'manageddisks':
         _drawManagedDisks(shape, opts);
+        break;
+
+      // Azure Database shapes
+      case 'azuresql':
+        _drawAzureSql(shape, opts);
+        break;
+      case 'cosmosdb':
+        _drawCosmosDb(shape, opts);
+        break;
+      case 'azuremysql':
+        _drawAzureMySql(shape, opts);
+        break;
+      case 'azurepostgres':
+        _drawAzurePostgres(shape, opts);
+        break;
+      case 'sqlmanaged':
+        _drawSqlManaged(shape, opts);
+        break;
+      case 'rediscache':
+        _drawRedisCache(shape, opts);
+        break;
+      case 'datafactory':
+        _drawDataFactory(shape, opts);
+        break;
+      case 'synapse':
+        _drawSynapse(shape, opts);
         break;
     }
 
@@ -942,143 +999,99 @@ const CanvasView = (() => {
   }
 
   // === Azure Storage shape renderers ============================
+  // All use official Microsoft Azure SVG icons via AzureIcons cache.
 
-  /** Blob Storage — rect with stacked circles icon */
+  /** Helper: draw an Azure SVG icon in the top-right corner of a shape */
+  function _drawAzureIcon(shape, typeKey) {
+    const img = AzureIcons.get(typeKey);
+    if (!img || !img.complete || !img.naturalWidth) return;
+    const s = Math.min(24, Math.min(shape.width, shape.height) * 0.35);
+    ctx.drawImage(img, shape.x + shape.width - s - 4, shape.y + 4, s, s);
+  }
+
   function _drawBlobStorage(shape, opts) {
     _baseRect(shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 18, iy = y + 5, r = 3;
-    // Three stacked circles (blobs)
-    ctx.beginPath(); ctx.arc(ix + 6, iy + 3, r, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(ix + 3, iy + 10, r, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(ix + 9, iy + 10, r, 0, Math.PI * 2); ctx.stroke();
-    ctx.restore();
+    _drawAzureIcon(shape, 'blobstorage');
     _drawShapeText(shape);
   }
 
-  /** File Storage — rect with folder/file icon */
   function _drawFileStorage(shape, opts) {
     _baseRect(shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 18, iy = y + 5;
-    // Folder shape
-    ctx.beginPath();
-    ctx.moveTo(ix, iy + 3);
-    ctx.lineTo(ix, iy + 14);
-    ctx.lineTo(ix + 14, iy + 14);
-    ctx.lineTo(ix + 14, iy + 3);
-    ctx.lineTo(ix + 7, iy + 3);
-    ctx.lineTo(ix + 5, iy);
-    ctx.lineTo(ix, iy);
-    ctx.closePath();
-    ctx.stroke();
-    // Horizontal line for folder tab
-    ctx.beginPath();
-    ctx.moveTo(ix, iy + 3);
-    ctx.lineTo(ix + 14, iy + 3);
-    ctx.stroke();
-    ctx.restore();
+    _drawAzureIcon(shape, 'filestorage');
     _drawShapeText(shape);
   }
 
-  /** Queue Storage — rect with stacked horizontal bars icon */
   function _drawQueueStorage(shape, opts) {
     _baseRect(shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 18, iy = y + 5;
-    // Three horizontal bars (queue messages)
-    for (let i = 0; i < 3; i++) {
-      const by = iy + i * 5;
-      ctx.beginPath();
-      ctx.rect(ix, by, 13, 3);
-      ctx.stroke();
-    }
-    // Arrow at bottom
-    ctx.beginPath();
-    ctx.moveTo(ix + 3, iy + 15);
-    ctx.lineTo(ix + 10, iy + 15);
-    ctx.moveTo(ix + 8, iy + 13);
-    ctx.lineTo(ix + 10, iy + 15);
-    ctx.lineTo(ix + 8, iy + 17);
-    ctx.stroke();
-    ctx.restore();
+    _drawAzureIcon(shape, 'queuestorage');
     _drawShapeText(shape);
   }
 
-  /** Table Storage — rect with grid/table icon */
   function _drawTableStorage(shape, opts) {
     _baseRect(shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 18, iy = y + 4;
-    // Table grid
-    ctx.beginPath(); ctx.rect(ix, iy, 14, 14); ctx.stroke();
-    // Horizontal lines
-    ctx.beginPath(); ctx.moveTo(ix, iy + 5); ctx.lineTo(ix + 14, iy + 5); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(ix, iy + 9.5); ctx.lineTo(ix + 14, iy + 9.5); ctx.stroke();
-    // Vertical line
-    ctx.beginPath(); ctx.moveTo(ix + 5, iy); ctx.lineTo(ix + 5, iy + 14); ctx.stroke();
-    ctx.restore();
+    _drawAzureIcon(shape, 'tablestorage');
     _drawShapeText(shape);
   }
 
-  /** Data Lake — rect with wave icon */
   function _drawDataLake(shape, opts) {
     _baseRect(shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 20, iy = y + 5;
-    // Water waves
-    for (let row = 0; row < 3; row++) {
-      const wy = iy + row * 5;
-      ctx.beginPath();
-      ctx.moveTo(ix, wy + 2);
-      ctx.bezierCurveTo(ix + 4, wy, ix + 8, wy + 4, ix + 12, wy + 2);
-      ctx.lineTo(ix + 15, wy + 2);
-      ctx.stroke();
-    }
-    ctx.restore();
+    _drawAzureIcon(shape, 'datalake');
     _drawShapeText(shape);
   }
 
-  /** Managed Disks — rect with stacked disk icon */
   function _drawManagedDisks(shape, opts) {
     _baseRect(shape, opts);
-    const { x, y, width: w, height: h } = shape;
-    ctx.save();
-    ctx.strokeStyle = '#0078d4';
-    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
-    const ix = x + w - 18, iy = y + 4;
-    // Stacked disks (like a DB cylinder but flatter)
-    const dw = 14, dh = 4;
-    for (let i = 0; i < 3; i++) {
-      const dy = iy + i * 5;
-      ctx.beginPath();
-      ctx.ellipse(ix + dw / 2, dy, dw / 2, dh / 2, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      if (i < 2) {
-        ctx.beginPath();
-        ctx.moveTo(ix, dy);
-        ctx.lineTo(ix, dy + 5);
-        ctx.moveTo(ix + dw, dy);
-        ctx.lineTo(ix + dw, dy + 5);
-        ctx.stroke();
-      }
-    }
-    ctx.restore();
+    _drawAzureIcon(shape, 'manageddisks');
+    _drawShapeText(shape);
+  }
+
+  // === Azure Database shape renderers ============================
+
+  function _drawAzureSql(shape, opts) {
+    _baseRect(shape, opts);
+    _drawAzureIcon(shape, 'azuresql');
+    _drawShapeText(shape);
+  }
+
+  function _drawCosmosDb(shape, opts) {
+    _baseRect(shape, opts);
+    _drawAzureIcon(shape, 'cosmosdb');
+    _drawShapeText(shape);
+  }
+
+  function _drawAzureMySql(shape, opts) {
+    _baseRect(shape, opts);
+    _drawAzureIcon(shape, 'azuremysql');
+    _drawShapeText(shape);
+  }
+
+  function _drawAzurePostgres(shape, opts) {
+    _baseRect(shape, opts);
+    _drawAzureIcon(shape, 'azurepostgres');
+    _drawShapeText(shape);
+  }
+
+  function _drawSqlManaged(shape, opts) {
+    _baseRect(shape, opts);
+    _drawAzureIcon(shape, 'sqlmanaged');
+    _drawShapeText(shape);
+  }
+
+  function _drawRedisCache(shape, opts) {
+    _baseRect(shape, opts);
+    _drawAzureIcon(shape, 'rediscache');
+    _drawShapeText(shape);
+  }
+
+  function _drawDataFactory(shape, opts) {
+    _baseRect(shape, opts);
+    _drawAzureIcon(shape, 'datafactory');
+    _drawShapeText(shape);
+  }
+
+  function _drawSynapse(shape, opts) {
+    _baseRect(shape, opts);
+    _drawAzureIcon(shape, 'synapse');
     _drawShapeText(shape);
   }
 

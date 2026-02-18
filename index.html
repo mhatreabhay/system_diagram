@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SystemDraw — System Design Diagrams</title>
-  <link rel="stylesheet" href="css/styles.css?v=3">
+  <link rel="stylesheet" href="css/styles.css?v=4">
   <!-- Rough.js for hand-drawn aesthetic -->
   <script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.min.js"></script>
 </head>
@@ -236,6 +236,20 @@
           <button class="ribbon-item" data-systool="externalapi" data-label="External API">🔗 External API</button>
         </div>
       </div>
+      <div class="ribbon-category" data-category="azuredatabase">
+        <div class="ribbon-icon" title="Azure Database">&#x1F5C4;</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Azure Database</div>
+          <button class="ribbon-item" data-systool="azuresql" data-label="Azure SQL">&#x1F4BE; Azure SQL</button>
+          <button class="ribbon-item" data-systool="cosmosdb" data-label="Cosmos DB">&#x1F30D; Cosmos DB</button>
+          <button class="ribbon-item" data-systool="azuremysql" data-label="Azure MySQL">&#x1F42C; Azure MySQL</button>
+          <button class="ribbon-item" data-systool="azurepostgres" data-label="Azure PostgreSQL">&#x1F418; Azure PostgreSQL</button>
+          <button class="ribbon-item" data-systool="sqlmanaged" data-label="SQL Managed Instance">&#x1F3E2; SQL Managed Instance</button>
+          <button class="ribbon-item" data-systool="rediscache" data-label="Redis Cache">&#x26A1; Redis Cache</button>
+          <button class="ribbon-item" data-systool="datafactory" data-label="Data Factory">&#x1F3ED; Data Factory</button>
+          <button class="ribbon-item" data-systool="synapse" data-label="Synapse Analytics">&#x1F4CA; Synapse Analytics</button>
+        </div>
+      </div>
       <div class="ribbon-category" data-category="azurestorage">
         <div class="ribbon-icon" title="Azure Storage">☁</div>
         <div class="ribbon-flyout">
@@ -372,13 +386,13 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/utils.js?v=3"></script>
-  <script src="js/shapes.js?v=3"></script>
-  <script src="js/history.js?v=3"></script>
-  <script src="js/canvas.js?v=3"></script>
-  <script src="js/connectors.js?v=3"></script>
-  <script src="js/tools.js?v=3"></script>
-  <script src="js/export.js?v=3"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/utils.js?v=4"></script>
+  <script src="js/shapes.js?v=4"></script>
+  <script src="js/history.js?v=4"></script>
+  <script src="js/canvas.js?v=4"></script>
+  <script src="js/connectors.js?v=4"></script>
+  <script src="js/tools.js?v=4"></script>
+  <script src="js/export.js?v=4"></script>
+  <script src="js/app.js?v=4"></script>
 </body>
 </html>

@@ -16,6 +16,9 @@ const Shapes = (() => {
     // Azure Storage
     'blobstorage', 'filestorage', 'queuestorage', 'tablestorage',
     'datalake', 'manageddisks',
+    // Azure Database
+    'azuresql', 'cosmosdb', 'azuremysql', 'azurepostgres',
+    'sqlmanaged', 'rediscache', 'datafactory', 'synapse',
   ]);
 
   /**
