@@ -241,7 +241,16 @@ const Shapes = (() => {
    * Handles: nw, n, ne, e, se, s, sw, w
    */
   function getHandleAtPoint(shape, px, py, handleSize = 8) {
-    if (shape.type === 'freehand') return null; // no resize for freehand
+    // Freehand: allow endpoint handles for connector binding
+    if (shape.type === 'freehand') {
+      if (shape.points && shape.points.length >= 2) {
+        const startP = shape.points[0];
+        const endP = shape.points[shape.points.length - 1];
+        if (Utils.distance(px, py, startP.x, startP.y) <= handleSize) return 'lineStart';
+        if (Utils.distance(px, py, endP.x, endP.y) <= handleSize) return 'lineEnd';
+      }
+      return null;
+    }
 
     const b = getBounds(shape);
     const hs = handleSize;

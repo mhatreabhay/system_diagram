@@ -1415,7 +1415,18 @@ const CanvasView = (() => {
           ctx.stroke();
         }
       }
-    } else if (shape.type !== 'freehand') {
+    } else if (shape.type === 'freehand') {
+      // Show start/end endpoint handles for freehand connector binding
+      if (shape.points && shape.points.length >= 2) {
+        const pts = [shape.points[0], shape.points[shape.points.length - 1]];
+        for (const p of pts) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, handleSize, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+    } else {
       const positions = [
         { x: b.x,         y: b.y },
         { x: b.x + b.w/2, y: b.y },
@@ -1497,7 +1508,7 @@ const CanvasView = (() => {
     // Draw connection dots on bound endpoints of selected arrows
     for (const shape of shapes) {
       if (!selectedIds.has(shape.id)) continue;
-      if (shape.type !== 'arrow' && shape.type !== 'line') continue;
+      if (shape.type !== 'arrow' && shape.type !== 'line' && shape.type !== 'freehand') continue;
       if (!shape.points || shape.points.length < 2) continue;
 
       ctx.save();

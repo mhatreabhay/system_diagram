@@ -89,7 +89,7 @@ const Connectors = (() => {
    */
   function updateBindings(shapes, movedShapeId) {
     for (const shape of shapes) {
-      if (shape.type !== 'arrow' && shape.type !== 'line') continue;
+      if (shape.type !== 'arrow' && shape.type !== 'line' && shape.type !== 'freehand') continue;
       if (!shape.points || shape.points.length < 2) continue;
 
       if (shape.startBinding && shape.startBinding.shapeId === movedShapeId) {
@@ -115,7 +115,7 @@ const Connectors = (() => {
    */
   function resolveAllBindings(shapes) {
     for (const shape of shapes) {
-      if (shape.type !== 'arrow' && shape.type !== 'line') continue;
+      if (shape.type !== 'arrow' && shape.type !== 'line' && shape.type !== 'freehand') continue;
       if (!shape.points || shape.points.length < 2) continue;
 
       if (shape.startBinding) {

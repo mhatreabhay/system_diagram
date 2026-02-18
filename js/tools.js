@@ -102,7 +102,7 @@ const Tools = (() => {
     // Build anchor hint context if drawing/moving/resizing an arrow/line
     let anchorHintCtx = null;
     const tool = currentTool;
-    const isArrowTool = (tool === 'arrow' || tool === 'line') || (drawingShape && (drawingShape.type === 'arrow' || drawingShape.type === 'line'));
+    const isArrowTool = (tool === 'arrow' || tool === 'line' || tool === 'freehand') || (drawingShape && (drawingShape.type === 'arrow' || drawingShape.type === 'line' || drawingShape.type === 'freehand'));
     const isDraggingArrow = isDragging && (dragType === 'move' || dragType === 'resize') && _isSelectedArrowOrLine();
     if (isArrowTool || isDraggingArrow) {
       anchorHintCtx = {
@@ -117,7 +117,7 @@ const Tools = (() => {
   function _isSelectedArrowOrLine() {
     for (const id of selectedIds) {
       const s = shapes.find(sh => sh.id === id);
-      if (s && (s.type === 'arrow' || s.type === 'line')) return true;
+      if (s && (s.type === 'arrow' || s.type === 'line' || s.type === 'freehand')) return true;
     }
     return false;
   }
@@ -252,14 +252,23 @@ const Tools = (() => {
         break;
       }
 
-      case 'freehand':
+      case 'freehand': {
+        let fhStartPt = { x: world.x, y: world.y };
+        let fhStartBinding = null;
+        const fhStartSnap = Connectors.findNearestBoundaryPoint(shapes, world.x, world.y);
+        if (fhStartSnap) {
+          fhStartPt = { x: fhStartSnap.x, y: fhStartSnap.y };
+          fhStartBinding = { shapeId: fhStartSnap.shapeId, angle: fhStartSnap.angle };
+        }
         drawingShape = Shapes.create('freehand', {
-          points: [{ x: world.x, y: world.y }],
+          points: [{ ...fhStartPt }],
           strokeColor, strokeWidth, strokeDash,
+          startBinding: fhStartBinding,
         });
         isDragging = true;
         dragType = 'draw';
         break;
+      }
 
       case 'text':
         handleTextClick(world);
@@ -495,9 +504,14 @@ const Tools = (() => {
         break;
       }
 
-      case 'freehand':
+      case 'freehand': {
         drawingShape.points.push({ x: world.x, y: world.y });
+        // Check for end-point snap while drawing
+        const fhEndSnap = Connectors.findNearestBoundaryPoint(shapes, world.x, world.y,
+          drawingShape.startBinding ? [drawingShape.startBinding.shapeId] : []);
+        drawingShape._hoverSnap = fhEndSnap || null;
         break;
+      }
     }
 
     // Temporarily render the in-progress shape
@@ -505,7 +519,7 @@ const Tools = (() => {
       [...shapes, drawingShape],
       selectedIds,
       null,
-      (drawingShape.type === 'arrow' || drawingShape.type === 'line')
+      (drawingShape.type === 'arrow' || drawingShape.type === 'line' || drawingShape.type === 'freehand')
         ? { cursorWorld: cursorWorld, snapTarget: drawingShape._hoverSnap || null }
         : null
     );
@@ -529,12 +543,19 @@ const Tools = (() => {
     }
 
     if (!tooSmall) {
-      // Store end binding if arrow/line snapped to a boundary point
-      if ((drawingShape.type === 'line' || drawingShape.type === 'arrow') && drawingShape._hoverSnap) {
+      // Store end binding if arrow/line/freehand snapped to a boundary point
+      if ((drawingShape.type === 'line' || drawingShape.type === 'arrow' || drawingShape.type === 'freehand') && drawingShape._hoverSnap) {
         drawingShape.endBinding = {
           shapeId: drawingShape._hoverSnap.shapeId,
           angle: drawingShape._hoverSnap.angle,
         };
+        // Snap the last point to the exact boundary position
+        if (drawingShape.points && drawingShape.points.length >= 2) {
+          drawingShape.points[drawingShape.points.length - 1] = {
+            x: drawingShape._hoverSnap.x,
+            y: drawingShape._hoverSnap.y,
+          };
+        }
       }
       delete drawingShape._hoverSnap;
 
@@ -559,6 +580,9 @@ const Tools = (() => {
     const dx = world.x - dragStartWorld.x;
     const dy = world.y - dragStartWorld.y;
 
+    const movedIds = new Set(dragOrigShapes.map(o => o.id));
+
+    // First pass: move all selected shapes to their new positions
     for (const orig of dragOrigShapes) {
       const shape = shapes.find(s => s.id === orig.id);
       if (!shape) continue;
@@ -568,18 +592,26 @@ const Tools = (() => {
           x: p.x + dx,
           y: p.y + dy,
         }));
-        // When dragging an arrow/line directly, detach its bindings
-        if (shape.type === 'arrow' || shape.type === 'line') {
-          shape.startBinding = null;
-          shape.endBinding = null;
+        // When dragging a connector directly, detach bindings
+        // UNLESS the binding target is also being moved (group move)
+        if (shape.type === 'arrow' || shape.type === 'line' || shape.type === 'freehand') {
+          if (shape.startBinding && !movedIds.has(shape.startBinding.shapeId)) {
+            shape.startBinding = null;
+          }
+          if (shape.endBinding && !movedIds.has(shape.endBinding.shapeId)) {
+            shape.endBinding = null;
+          }
         }
       } else {
         shape.x = orig.x + dx;
         shape.y = orig.y + dy;
       }
+    }
 
-      // Update any arrows/lines bound to this shape
-      Connectors.updateBindings(shapes, shape.id);
+    // Second pass: update bindings AFTER all shapes are in their new positions.
+    // This ensures connectors not in the selection follow their bound shapes.
+    for (const orig of dragOrigShapes) {
+      Connectors.updateBindings(shapes, orig.id);
     }
     redraw();
   }
@@ -591,8 +623,8 @@ const Tools = (() => {
     const dy = world.y - dragStartWorld.y;
     dragStartWorld = { ...world };
 
-    // If dragging an arrow/line endpoint, snap to boundary points
-    if ((dragShape.type === 'arrow' || dragShape.type === 'line') && dragShape.points &&
+    // If dragging an arrow/line/freehand endpoint, snap to boundary points
+    if ((dragShape.type === 'arrow' || dragShape.type === 'line' || dragShape.type === 'freehand') && dragShape.points &&
         (dragHandle === 'lineStart' || dragHandle === 'lineEnd')) {
       const excludeIds = [dragShape.id];
       const snap = Connectors.findNearestBoundaryPoint(shapes, world.x, world.y, excludeIds);
@@ -614,36 +646,38 @@ const Tools = (() => {
   }
 
   /**
-   * After finishing a move of arrow/line shapes, try to re-bind
+   * After finishing a move of arrow/line/freehand shapes, try to re-bind
    * their endpoints to nearby shape boundaries.
+   * Only rebinds endpoints whose bindings were detached during the move.
+   * Endpoints that kept their binding (group-moved with target) are left alone.
    */
   function _tryRebindArrowsAfterMove() {
     for (const id of selectedIds) {
       const shape = shapes.find(s => s.id === id);
       if (!shape) continue;
-      if (shape.type !== 'arrow' && shape.type !== 'line') continue;
+      if (shape.type !== 'arrow' && shape.type !== 'line' && shape.type !== 'freehand') continue;
       if (!shape.points || shape.points.length < 2) continue;
 
       const excludeIds = [shape.id];
 
-      // Try start endpoint
-      const startPt = shape.points[0];
-      const startSnap = Connectors.findNearestBoundaryPoint(shapes, startPt.x, startPt.y, excludeIds);
-      if (startSnap) {
-        shape.points[0] = { x: startSnap.x, y: startSnap.y };
-        shape.startBinding = { shapeId: startSnap.shapeId, angle: startSnap.angle };
-      } else {
-        shape.startBinding = null;
+      // Try start endpoint — only if NOT already bound
+      if (!shape.startBinding) {
+        const startPt = shape.points[0];
+        const startSnap = Connectors.findNearestBoundaryPoint(shapes, startPt.x, startPt.y, excludeIds);
+        if (startSnap) {
+          shape.points[0] = { x: startSnap.x, y: startSnap.y };
+          shape.startBinding = { shapeId: startSnap.shapeId, angle: startSnap.angle };
+        }
       }
 
-      // Try end endpoint
-      const endPt = shape.points[shape.points.length - 1];
-      const endSnap = Connectors.findNearestBoundaryPoint(shapes, endPt.x, endPt.y, excludeIds);
-      if (endSnap) {
-        shape.points[shape.points.length - 1] = { x: endSnap.x, y: endSnap.y };
-        shape.endBinding = { shapeId: endSnap.shapeId, angle: endSnap.angle };
-      } else {
-        shape.endBinding = null;
+      // Try end endpoint — only if NOT already bound
+      if (!shape.endBinding) {
+        const endPt = shape.points[shape.points.length - 1];
+        const endSnap = Connectors.findNearestBoundaryPoint(shapes, endPt.x, endPt.y, excludeIds);
+        if (endSnap) {
+          shape.points[shape.points.length - 1] = { x: endSnap.x, y: endSnap.y };
+          shape.endBinding = { shapeId: endSnap.shapeId, angle: endSnap.angle };
+        }
       }
     }
   }
@@ -654,7 +688,7 @@ const Tools = (() => {
    */
   function _tryRebindAfterResize(world) {
     if (!dragShape) return;
-    if (dragShape.type !== 'arrow' && dragShape.type !== 'line') return;
+    if (dragShape.type !== 'arrow' && dragShape.type !== 'line' && dragShape.type !== 'freehand') return;
     if (!dragShape.points || dragShape.points.length < 2) return;
     if (dragHandle !== 'lineStart' && dragHandle !== 'lineEnd') return;
 
