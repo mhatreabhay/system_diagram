@@ -317,6 +317,66 @@ const Export = (() => {
       case 'archivestorage':
         _exportArchiveStorage(ctx, rc, shape, opts);
         break;
+
+      // Azure Compute shapes
+      case 'azurevm':      _exportAzureVm(ctx, rc, shape, opts); break;
+      case 'appservice':   _exportAppService(ctx, rc, shape, opts); break;
+      case 'azurefunc':    _exportAzureFunc(ctx, rc, shape, opts); break;
+      case 'aks':          _exportAks(ctx, rc, shape, opts); break;
+      case 'aci':          _exportAci(ctx, rc, shape, opts); break;
+      case 'springapps':   _exportSpringApps(ctx, rc, shape, opts); break;
+
+      // Azure Networking shapes
+      case 'vnet':         _exportVnet(ctx, rc, shape, opts); break;
+      case 'azurelb':      _exportAzureLb(ctx, rc, shape, opts); break;
+      case 'appgateway':   _exportAppGateway(ctx, rc, shape, opts); break;
+      case 'expressroute': _exportExpressRoute(ctx, rc, shape, opts); break;
+      case 'azurefirewall':_exportAzureFirewall(ctx, rc, shape, opts); break;
+      case 'frontdoor':    _exportFrontDoor(ctx, rc, shape, opts); break;
+      case 'azuredns':     _exportAzureDns(ctx, rc, shape, opts); break;
+      case 'bastion':      _exportBastion(ctx, rc, shape, opts); break;
+
+      // Azure Integration shapes
+      case 'apim':         _exportApim(ctx, rc, shape, opts); break;
+      case 'servicebus':   _exportServiceBus(ctx, rc, shape, opts); break;
+      case 'eventgrid':    _exportEventGrid(ctx, rc, shape, opts); break;
+      case 'eventhubs':    _exportEventHubs(ctx, rc, shape, opts); break;
+      case 'logicapps':    _exportLogicApps(ctx, rc, shape, opts); break;
+      case 'appconfig':    _exportAppConfig(ctx, rc, shape, opts); break;
+
+      // Azure Security shapes
+      case 'keyvault':     _exportKeyVault(ctx, rc, shape, opts); break;
+      case 'sentinel':     _exportSentinel(ctx, rc, shape, opts); break;
+      case 'defender':     _exportDefender(ctx, rc, shape, opts); break;
+      case 'entraid':      _exportEntraId(ctx, rc, shape, opts); break;
+      case 'managedid':    _exportManagedId(ctx, rc, shape, opts); break;
+
+      // Azure DevOps & Monitoring shapes
+      case 'azuredevops':  _exportAzureDevops(ctx, rc, shape, opts); break;
+      case 'appinsights':  _exportAppInsights(ctx, rc, shape, opts); break;
+      case 'loganalytics': _exportLogAnalytics(ctx, rc, shape, opts); break;
+      case 'azuremonitor': _exportAzureMonitor(ctx, rc, shape, opts); break;
+      case 'loadtest':     _exportLoadTest(ctx, rc, shape, opts); break;
+
+      // Azure AI & ML shapes
+      case 'openai':       _exportOpenAi(ctx, rc, shape, opts); break;
+      case 'cogservices':  _exportCogServices(ctx, rc, shape, opts); break;
+      case 'azureml':      _exportAzureMl(ctx, rc, shape, opts); break;
+      case 'botservice':   _exportBotService(ctx, rc, shape, opts); break;
+      case 'aisearch':     _exportAiSearch(ctx, rc, shape, opts); break;
+      case 'aistudio':     _exportAiStudio(ctx, rc, shape, opts); break;
+
+      // Azure IoT shapes
+      case 'iothub':       _exportIotHub(ctx, rc, shape, opts); break;
+      case 'iotcentral':   _exportIotCentral(ctx, rc, shape, opts); break;
+      case 'digitaltwins': _exportDigitalTwins(ctx, rc, shape, opts); break;
+      case 'iotedge':      _exportIotEdge(ctx, rc, shape, opts); break;
+
+      // Azure Analytics shapes
+      case 'databricks':   _exportDatabricks(ctx, rc, shape, opts); break;
+      case 'hdinsight':    _exportHdInsight(ctx, rc, shape, opts); break;
+      case 'dataexplorer': _exportDataExplorer(ctx, rc, shape, opts); break;
+      case 'powerbi':      _exportPowerBi(ctx, rc, shape, opts); break;
     }
 
     ctx.globalAlpha = 1;
@@ -989,6 +1049,66 @@ const Export = (() => {
     _exportIcon(ctx, shape, '\u{1F5C4}', '#78716c');
     _exportShapeText(ctx, shape);
   }
+
+  // === Azure Compute export renderers ===
+  function _exportAzureVm(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'azurevm');_exportShapeText(c,s);}
+  function _exportAppService(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'appservice');_exportShapeText(c,s);}
+  function _exportAzureFunc(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'azurefunc');_exportShapeText(c,s);}
+  function _exportAks(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'aks');_exportShapeText(c,s);}
+  function _exportAci(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'aci');_exportShapeText(c,s);}
+  function _exportSpringApps(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'springapps');_exportShapeText(c,s);}
+
+  // === Azure Networking export renderers ===
+  function _exportVnet(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'vnet');_exportShapeText(c,s);}
+  function _exportAzureLb(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'azurelb');_exportShapeText(c,s);}
+  function _exportAppGateway(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'appgateway');_exportShapeText(c,s);}
+  function _exportExpressRoute(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'expressroute');_exportShapeText(c,s);}
+  function _exportAzureFirewall(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'azurefirewall');_exportShapeText(c,s);}
+  function _exportFrontDoor(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'frontdoor');_exportShapeText(c,s);}
+  function _exportAzureDns(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'azuredns');_exportShapeText(c,s);}
+  function _exportBastion(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'bastion');_exportShapeText(c,s);}
+
+  // === Azure Integration export renderers ===
+  function _exportApim(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'apim');_exportShapeText(c,s);}
+  function _exportServiceBus(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'servicebus');_exportShapeText(c,s);}
+  function _exportEventGrid(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'eventgrid');_exportShapeText(c,s);}
+  function _exportEventHubs(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'eventhubs');_exportShapeText(c,s);}
+  function _exportLogicApps(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'logicapps');_exportShapeText(c,s);}
+  function _exportAppConfig(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'appconfig');_exportShapeText(c,s);}
+
+  // === Azure Security export renderers ===
+  function _exportKeyVault(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'keyvault');_exportShapeText(c,s);}
+  function _exportSentinel(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'sentinel');_exportShapeText(c,s);}
+  function _exportDefender(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'defender');_exportShapeText(c,s);}
+  function _exportEntraId(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'entraid');_exportShapeText(c,s);}
+  function _exportManagedId(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'managedid');_exportShapeText(c,s);}
+
+  // === Azure DevOps & Monitoring export renderers ===
+  function _exportAzureDevops(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'azuredevops');_exportShapeText(c,s);}
+  function _exportAppInsights(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'appinsights');_exportShapeText(c,s);}
+  function _exportLogAnalytics(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'loganalytics');_exportShapeText(c,s);}
+  function _exportAzureMonitor(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'azuremonitor');_exportShapeText(c,s);}
+  function _exportLoadTest(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'loadtest');_exportShapeText(c,s);}
+
+  // === Azure AI & ML export renderers ===
+  function _exportOpenAi(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'openai');_exportShapeText(c,s);}
+  function _exportCogServices(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'cogservices');_exportShapeText(c,s);}
+  function _exportAzureMl(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'azureml');_exportShapeText(c,s);}
+  function _exportBotService(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'botservice');_exportShapeText(c,s);}
+  function _exportAiSearch(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'aisearch');_exportShapeText(c,s);}
+  function _exportAiStudio(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'aistudio');_exportShapeText(c,s);}
+
+  // === Azure IoT export renderers ===
+  function _exportIotHub(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'iothub');_exportShapeText(c,s);}
+  function _exportIotCentral(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'iotcentral');_exportShapeText(c,s);}
+  function _exportDigitalTwins(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'digitaltwins');_exportShapeText(c,s);}
+  function _exportIotEdge(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'iotedge');_exportShapeText(c,s);}
+
+  // === Azure Analytics export renderers ===
+  function _exportDatabricks(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'databricks');_exportShapeText(c,s);}
+  function _exportHdInsight(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'hdinsight');_exportShapeText(c,s);}
+  function _exportDataExplorer(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'dataexplorer');_exportShapeText(c,s);}
+  function _exportPowerBi(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'powerbi');_exportShapeText(c,s);}
 
   function drawArrowHeadExport(ctx, fromX, fromY, toX, toY, color, strokeW) {
     const headLen = Math.max(12, strokeW * 4);

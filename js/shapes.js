@@ -21,6 +21,23 @@ const Shapes = (() => {
     // Azure Database
     'azuresql', 'cosmosdb', 'azuremysql', 'azurepostgres',
     'sqlmanaged', 'rediscache', 'datafactory', 'synapse',
+    // Azure Compute
+    'azurevm', 'appservice', 'azurefunc', 'aks', 'aci', 'springapps',
+    // Azure Networking
+    'vnet', 'azurelb', 'appgateway', 'expressroute',
+    'azurefirewall', 'frontdoor', 'azuredns', 'bastion',
+    // Azure Integration
+    'apim', 'servicebus', 'eventgrid', 'eventhubs', 'logicapps', 'appconfig',
+    // Azure Security
+    'keyvault', 'sentinel', 'defender', 'entraid', 'managedid',
+    // Azure DevOps & Monitoring
+    'azuredevops', 'appinsights', 'loganalytics', 'azuremonitor', 'loadtest',
+    // Azure AI & ML
+    'openai', 'cogservices', 'azureml', 'botservice', 'aisearch', 'aistudio',
+    // Azure IoT
+    'iothub', 'iotcentral', 'digitaltwins', 'iotedge',
+    // Azure Analytics
+    'databricks', 'hdinsight', 'dataexplorer', 'powerbi',
   ]);
 
   /**

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SystemDraw — System Design Diagrams</title>
-  <link rel="stylesheet" href="css/styles.css?v=4">
+  <link rel="stylesheet" href="css/styles.css?v=5">
   <!-- Rough.js for hand-drawn aesthetic -->
   <script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.min.js"></script>
 </head>
@@ -196,6 +196,14 @@
           <button class="ribbon-item" data-systool="microservice" data-label="Microservice">&#11047; Microservice</button>
           <button class="ribbon-item" data-systool="function" data-label="Function">&lambda; Function</button>
           <button class="ribbon-item" data-systool="container" data-label="Container">📦 Container</button>
+          <hr class="flyout-divider">
+          <div class="flyout-subtitle">Azure</div>
+          <button class="ribbon-item" data-systool="azurevm" data-label="Virtual Machine">🖥 Virtual Machine</button>
+          <button class="ribbon-item" data-systool="appservice" data-label="App Service">🌐 App Service</button>
+          <button class="ribbon-item" data-systool="azurefunc" data-label="Functions">⚡ Functions</button>
+          <button class="ribbon-item" data-systool="aks" data-label="Kubernetes (AKS)">☸ Kubernetes (AKS)</button>
+          <button class="ribbon-item" data-systool="aci" data-label="Container Instances">📦 Container Instances</button>
+          <button class="ribbon-item" data-systool="springapps" data-label="Spring Apps">🌱 Spring Apps</button>
         </div>
       </div>
       <div class="ribbon-category" data-category="network">
@@ -207,6 +215,16 @@
           <button class="ribbon-item" data-systool="cdn" data-label="CDN">🌐 CDN</button>
           <button class="ribbon-item" data-systool="cloud" data-label="Cloud">&#9729; Cloud</button>
           <button class="ribbon-item" data-systool="firewall" data-label="Firewall">🛡 Firewall</button>
+          <hr class="flyout-divider">
+          <div class="flyout-subtitle">Azure</div>
+          <button class="ribbon-item" data-systool="vnet" data-label="Virtual Network">🔷 Virtual Network</button>
+          <button class="ribbon-item" data-systool="azurelb" data-label="Load Balancer">⚖ Load Balancer</button>
+          <button class="ribbon-item" data-systool="appgateway" data-label="App Gateway">🚪 App Gateway</button>
+          <button class="ribbon-item" data-systool="expressroute" data-label="ExpressRoute">🔌 ExpressRoute</button>
+          <button class="ribbon-item" data-systool="azurefirewall" data-label="Azure Firewall">🛡 Azure Firewall</button>
+          <button class="ribbon-item" data-systool="frontdoor" data-label="Front Door">🚀 Front Door</button>
+          <button class="ribbon-item" data-systool="azuredns" data-label="Azure DNS">🌐 Azure DNS</button>
+          <button class="ribbon-item" data-systool="bastion" data-label="Bastion">🏰 Bastion</button>
         </div>
       </div>
       <div class="ribbon-category" data-category="messaging">
@@ -216,6 +234,14 @@
           <button class="ribbon-item" data-systool="queue" data-label="Queue">&#10145; Queue</button>
           <button class="ribbon-item" data-systool="pubsub" data-label="Pub/Sub">📣 Pub/Sub</button>
           <button class="ribbon-item" data-systool="eventbus" data-label="Event Bus">📨 Event Bus</button>
+          <hr class="flyout-divider">
+          <div class="flyout-subtitle">Azure</div>
+          <button class="ribbon-item" data-systool="apim" data-label="API Management">🔧 API Management</button>
+          <button class="ribbon-item" data-systool="servicebus" data-label="Service Bus">🚌 Service Bus</button>
+          <button class="ribbon-item" data-systool="eventgrid" data-label="Event Grid">📡 Event Grid</button>
+          <button class="ribbon-item" data-systool="eventhubs" data-label="Event Hubs">📨 Event Hubs</button>
+          <button class="ribbon-item" data-systool="logicapps" data-label="Logic Apps">🔀 Logic Apps</button>
+          <button class="ribbon-item" data-systool="appconfig" data-label="App Configuration">⚙ App Configuration</button>
         </div>
       </div>
       <div class="ribbon-category" data-category="clients">
@@ -234,6 +260,13 @@
           <button class="ribbon-item" data-systool="monitor" data-label="Monitor">📈 Monitor</button>
           <button class="ribbon-item" data-systool="logger" data-label="Logger">📜 Logger</button>
           <button class="ribbon-item" data-systool="scheduler" data-label="Scheduler">&#9202; Scheduler</button>
+          <hr class="flyout-divider">
+          <div class="flyout-subtitle">Azure</div>
+          <button class="ribbon-item" data-systool="azuredevops" data-label="Azure DevOps">🔧 Azure DevOps</button>
+          <button class="ribbon-item" data-systool="appinsights" data-label="App Insights">📊 App Insights</button>
+          <button class="ribbon-item" data-systool="loganalytics" data-label="Log Analytics">📋 Log Analytics</button>
+          <button class="ribbon-item" data-systool="azuremonitor" data-label="Azure Monitor">📈 Azure Monitor</button>
+          <button class="ribbon-item" data-systool="loadtest" data-label="Load Testing">🏋 Load Testing</button>
         </div>
       </div>
       <div class="ribbon-category" data-category="security">
@@ -243,6 +276,13 @@
           <button class="ribbon-item" data-systool="notification" data-label="Notification">🔔 Notification</button>
           <button class="ribbon-item" data-systool="auth" data-label="Auth">🔒 Auth</button>
           <button class="ribbon-item" data-systool="externalapi" data-label="External API">🔗 External API</button>
+          <hr class="flyout-divider">
+          <div class="flyout-subtitle">Azure</div>
+          <button class="ribbon-item" data-systool="keyvault" data-label="Key Vault">🔑 Key Vault</button>
+          <button class="ribbon-item" data-systool="sentinel" data-label="Sentinel">🛡 Sentinel</button>
+          <button class="ribbon-item" data-systool="defender" data-label="Defender">🛡 Defender</button>
+          <button class="ribbon-item" data-systool="entraid" data-label="Entra ID">🆔 Entra ID</button>
+          <button class="ribbon-item" data-systool="managedid" data-label="Managed Identity">🪣 Managed Identity</button>
         </div>
       </div>
       <div class="ribbon-category" data-category="storage">
@@ -262,6 +302,41 @@
           <button class="ribbon-item" data-systool="tablestorage" data-label="Table Storage">&#x1F4CA; Table Storage</button>
           <button class="ribbon-item" data-systool="datalake" data-label="Data Lake">&#x1F30A; Data Lake</button>
           <button class="ribbon-item" data-systool="manageddisks" data-label="Managed Disks">&#x1F4BF; Managed Disks</button>
+        </div>
+      </div>
+      <div class="ribbon-category" data-category="ai">
+        <div class="ribbon-icon" title="AI & ML">🤖</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">AI & Machine Learning</div>
+          <div class="flyout-subtitle">Azure</div>
+          <button class="ribbon-item" data-systool="openai" data-label="Azure OpenAI">🧠 Azure OpenAI</button>
+          <button class="ribbon-item" data-systool="cogservices" data-label="Cognitive Services">🧩 Cognitive Services</button>
+          <button class="ribbon-item" data-systool="azureml" data-label="Machine Learning">🔬 Machine Learning</button>
+          <button class="ribbon-item" data-systool="botservice" data-label="Bot Service">🤖 Bot Service</button>
+          <button class="ribbon-item" data-systool="aisearch" data-label="AI Search">🔍 AI Search</button>
+          <button class="ribbon-item" data-systool="aistudio" data-label="AI Studio">✨ AI Studio</button>
+        </div>
+      </div>
+      <div class="ribbon-category" data-category="iot">
+        <div class="ribbon-icon" title="IoT">📡</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">IoT</div>
+          <div class="flyout-subtitle">Azure</div>
+          <button class="ribbon-item" data-systool="iothub" data-label="IoT Hub">📡 IoT Hub</button>
+          <button class="ribbon-item" data-systool="iotcentral" data-label="IoT Central">🏭 IoT Central</button>
+          <button class="ribbon-item" data-systool="digitaltwins" data-label="Digital Twins">👯 Digital Twins</button>
+          <button class="ribbon-item" data-systool="iotedge" data-label="IoT Edge">📲 IoT Edge</button>
+        </div>
+      </div>
+      <div class="ribbon-category" data-category="analytics">
+        <div class="ribbon-icon" title="Analytics">📊</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Analytics</div>
+          <div class="flyout-subtitle">Azure</div>
+          <button class="ribbon-item" data-systool="databricks" data-label="Databricks">🧱 Databricks</button>
+          <button class="ribbon-item" data-systool="hdinsight" data-label="HDInsight">🐘 HDInsight</button>
+          <button class="ribbon-item" data-systool="dataexplorer" data-label="Data Explorer">🔍 Data Explorer</button>
+          <button class="ribbon-item" data-systool="powerbi" data-label="Power BI">📊 Power BI</button>
         </div>
       </div>
     </div>
@@ -388,13 +463,13 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/utils.js?v=4"></script>
-  <script src="js/shapes.js?v=4"></script>
-  <script src="js/history.js?v=4"></script>
-  <script src="js/canvas.js?v=4"></script>
-  <script src="js/connectors.js?v=4"></script>
-  <script src="js/tools.js?v=4"></script>
-  <script src="js/export.js?v=4"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/utils.js?v=5"></script>
+  <script src="js/shapes.js?v=5"></script>
+  <script src="js/history.js?v=5"></script>
+  <script src="js/canvas.js?v=5"></script>
+  <script src="js/connectors.js?v=5"></script>
+  <script src="js/tools.js?v=5"></script>
+  <script src="js/export.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
 </body>
 </html>

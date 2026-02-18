@@ -193,7 +193,22 @@ const Tools = (() => {
       case 'sqlmanaged':
       case 'rediscache':
       case 'datafactory':
-      case 'synapse': {
+      case 'synapse':
+      case 'azurevm': case 'appservice': case 'azurefunc':
+      case 'aks': case 'aci': case 'springapps':
+      case 'vnet': case 'azurelb': case 'appgateway':
+      case 'expressroute': case 'azurefirewall': case 'frontdoor':
+      case 'azuredns': case 'bastion':
+      case 'apim': case 'servicebus': case 'eventgrid':
+      case 'eventhubs': case 'logicapps': case 'appconfig':
+      case 'keyvault': case 'sentinel': case 'defender':
+      case 'entraid': case 'managedid':
+      case 'azuredevops': case 'appinsights': case 'loganalytics':
+      case 'azuremonitor': case 'loadtest':
+      case 'openai': case 'cogservices': case 'azureml':
+      case 'botservice': case 'aisearch': case 'aistudio':
+      case 'iothub': case 'iotcentral': case 'digitaltwins': case 'iotedge':
+      case 'databricks': case 'hdinsight': case 'dataexplorer': case 'powerbi': {
         // Firewall gets default red color scheme
         let shapeStroke = strokeColor;
         let shapeFill = fillEnabled ? fillColor : 'transparent';
@@ -439,7 +454,22 @@ const Tools = (() => {
       case 'sqlmanaged':
       case 'rediscache':
       case 'datafactory':
-      case 'synapse': {
+      case 'synapse':
+      case 'azurevm': case 'appservice': case 'azurefunc':
+      case 'aks': case 'aci': case 'springapps':
+      case 'vnet': case 'azurelb': case 'appgateway':
+      case 'expressroute': case 'azurefirewall': case 'frontdoor':
+      case 'azuredns': case 'bastion':
+      case 'apim': case 'servicebus': case 'eventgrid':
+      case 'eventhubs': case 'logicapps': case 'appconfig':
+      case 'keyvault': case 'sentinel': case 'defender':
+      case 'entraid': case 'managedid':
+      case 'azuredevops': case 'appinsights': case 'loganalytics':
+      case 'azuremonitor': case 'loadtest':
+      case 'openai': case 'cogservices': case 'azureml':
+      case 'botservice': case 'aisearch': case 'aistudio':
+      case 'iothub': case 'iotcentral': case 'digitaltwins': case 'iotedge':
+      case 'databricks': case 'hdinsight': case 'dataexplorer': case 'powerbi': {
         const bounds = Utils.normalizeBounds(
           dragStartWorld.x, dragStartWorld.y, world.x, world.y
         );

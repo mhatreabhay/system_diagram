@@ -21,6 +21,58 @@ const AzureIcons = (() => {
     rediscache:     'icons/azure-database/redis-cache.svg',
     datafactory:    'icons/azure-database/data-factory.svg',
     synapse:        'icons/azure-database/synapse.svg',
+    // Azure Compute
+    azurevm:        'icons/azure-compute/vm.svg',
+    appservice:     'icons/azure-compute/app-service.svg',
+    azurefunc:      'icons/azure-compute/functions.svg',
+    aks:            'icons/azure-compute/kubernetes.svg',
+    aci:            'icons/azure-compute/container-instances.svg',
+    springapps:     'icons/azure-compute/spring-apps.svg',
+    // Azure Networking
+    vnet:           'icons/azure-network/virtual-network.svg',
+    azurelb:        'icons/azure-network/load-balancer.svg',
+    appgateway:     'icons/azure-network/app-gateway.svg',
+    expressroute:   'icons/azure-network/expressroute.svg',
+    azurefirewall:  'icons/azure-network/firewall.svg',
+    frontdoor:      'icons/azure-network/front-door.svg',
+    azuredns:       'icons/azure-network/dns.svg',
+    bastion:        'icons/azure-network/bastion.svg',
+    // Azure Integration
+    apim:           'icons/azure-integration/api-management.svg',
+    servicebus:     'icons/azure-integration/service-bus.svg',
+    eventgrid:      'icons/azure-integration/event-grid.svg',
+    eventhubs:      'icons/azure-integration/event-hubs.svg',
+    logicapps:      'icons/azure-integration/logic-apps.svg',
+    appconfig:      'icons/azure-integration/app-config.svg',
+    // Azure Security
+    keyvault:       'icons/azure-security/key-vault.svg',
+    sentinel:       'icons/azure-security/sentinel.svg',
+    defender:       'icons/azure-security/defender.svg',
+    entraid:        'icons/azure-security/entra-id.svg',
+    managedid:      'icons/azure-security/managed-identity.svg',
+    // Azure DevOps & Monitoring
+    azuredevops:    'icons/azure-devops/devops.svg',
+    appinsights:    'icons/azure-devops/app-insights.svg',
+    loganalytics:   'icons/azure-devops/log-analytics.svg',
+    azuremonitor:   'icons/azure-devops/monitor.svg',
+    loadtest:       'icons/azure-devops/load-testing.svg',
+    // Azure AI & ML
+    openai:         'icons/azure-ai/openai.svg',
+    cogservices:    'icons/azure-ai/cognitive-services.svg',
+    azureml:        'icons/azure-ai/machine-learning.svg',
+    botservice:     'icons/azure-ai/bot-service.svg',
+    aisearch:       'icons/azure-ai/ai-search.svg',
+    aistudio:       'icons/azure-ai/ai-studio.svg',
+    // Azure IoT
+    iothub:         'icons/azure-iot/iot-hub.svg',
+    iotcentral:     'icons/azure-iot/iot-central.svg',
+    digitaltwins:   'icons/azure-iot/digital-twins.svg',
+    iotedge:        'icons/azure-iot/iot-edge.svg',
+    // Azure Analytics
+    databricks:     'icons/azure-analytics/databricks.svg',
+    hdinsight:      'icons/azure-analytics/hdinsight.svg',
+    dataexplorer:   'icons/azure-analytics/data-explorer.svg',
+    powerbi:        'icons/azure-analytics/power-bi.svg',
   };
   // Preload all icons as Image objects
   for (const [key, src] of Object.entries(_icons)) {
@@ -430,6 +482,66 @@ const CanvasView = (() => {
       case 'synapse':
         _drawSynapse(shape, opts);
         break;
+
+      // Azure Compute shapes
+      case 'azurevm':      _drawAzureVm(shape, opts); break;
+      case 'appservice':   _drawAppService(shape, opts); break;
+      case 'azurefunc':    _drawAzureFunc(shape, opts); break;
+      case 'aks':          _drawAks(shape, opts); break;
+      case 'aci':          _drawAci(shape, opts); break;
+      case 'springapps':   _drawSpringApps(shape, opts); break;
+
+      // Azure Networking shapes
+      case 'vnet':         _drawVnet(shape, opts); break;
+      case 'azurelb':      _drawAzureLb(shape, opts); break;
+      case 'appgateway':   _drawAppGateway(shape, opts); break;
+      case 'expressroute': _drawExpressRoute(shape, opts); break;
+      case 'azurefirewall':_drawAzureFirewall(shape, opts); break;
+      case 'frontdoor':    _drawFrontDoor(shape, opts); break;
+      case 'azuredns':     _drawAzureDns(shape, opts); break;
+      case 'bastion':      _drawBastion(shape, opts); break;
+
+      // Azure Integration shapes
+      case 'apim':         _drawApim(shape, opts); break;
+      case 'servicebus':   _drawServiceBus(shape, opts); break;
+      case 'eventgrid':    _drawEventGrid(shape, opts); break;
+      case 'eventhubs':    _drawEventHubs(shape, opts); break;
+      case 'logicapps':    _drawLogicApps(shape, opts); break;
+      case 'appconfig':    _drawAppConfig(shape, opts); break;
+
+      // Azure Security shapes
+      case 'keyvault':     _drawKeyVault(shape, opts); break;
+      case 'sentinel':     _drawSentinel(shape, opts); break;
+      case 'defender':     _drawDefender(shape, opts); break;
+      case 'entraid':      _drawEntraId(shape, opts); break;
+      case 'managedid':    _drawManagedId(shape, opts); break;
+
+      // Azure DevOps & Monitoring shapes
+      case 'azuredevops':  _drawAzureDevops(shape, opts); break;
+      case 'appinsights':  _drawAppInsights(shape, opts); break;
+      case 'loganalytics': _drawLogAnalytics(shape, opts); break;
+      case 'azuremonitor': _drawAzureMonitor(shape, opts); break;
+      case 'loadtest':     _drawLoadTest(shape, opts); break;
+
+      // Azure AI & ML shapes
+      case 'openai':       _drawOpenAi(shape, opts); break;
+      case 'cogservices':  _drawCogServices(shape, opts); break;
+      case 'azureml':      _drawAzureMl(shape, opts); break;
+      case 'botservice':   _drawBotService(shape, opts); break;
+      case 'aisearch':     _drawAiSearch(shape, opts); break;
+      case 'aistudio':     _drawAiStudio(shape, opts); break;
+
+      // Azure IoT shapes
+      case 'iothub':       _drawIotHub(shape, opts); break;
+      case 'iotcentral':   _drawIotCentral(shape, opts); break;
+      case 'digitaltwins': _drawDigitalTwins(shape, opts); break;
+      case 'iotedge':      _drawIotEdge(shape, opts); break;
+
+      // Azure Analytics shapes
+      case 'databricks':   _drawDatabricks(shape, opts); break;
+      case 'hdinsight':    _drawHdInsight(shape, opts); break;
+      case 'dataexplorer': _drawDataExplorer(shape, opts); break;
+      case 'powerbi':      _drawPowerBi(shape, opts); break;
     }
 
     ctx.globalAlpha = 1;
@@ -1134,6 +1246,66 @@ const CanvasView = (() => {
     _drawAzureIcon(shape, 'synapse');
     _drawShapeText(shape);
   }
+
+  // === Azure Compute shape renderers ============================
+  function _drawAzureVm(s,o){_baseRect(s,o);_drawAzureIcon(s,'azurevm');_drawShapeText(s);}
+  function _drawAppService(s,o){_baseRect(s,o);_drawAzureIcon(s,'appservice');_drawShapeText(s);}
+  function _drawAzureFunc(s,o){_baseRect(s,o);_drawAzureIcon(s,'azurefunc');_drawShapeText(s);}
+  function _drawAks(s,o){_baseRect(s,o);_drawAzureIcon(s,'aks');_drawShapeText(s);}
+  function _drawAci(s,o){_baseRect(s,o);_drawAzureIcon(s,'aci');_drawShapeText(s);}
+  function _drawSpringApps(s,o){_baseRect(s,o);_drawAzureIcon(s,'springapps');_drawShapeText(s);}
+
+  // === Azure Networking shape renderers ==========================
+  function _drawVnet(s,o){_baseRect(s,o);_drawAzureIcon(s,'vnet');_drawShapeText(s);}
+  function _drawAzureLb(s,o){_baseRect(s,o);_drawAzureIcon(s,'azurelb');_drawShapeText(s);}
+  function _drawAppGateway(s,o){_baseRect(s,o);_drawAzureIcon(s,'appgateway');_drawShapeText(s);}
+  function _drawExpressRoute(s,o){_baseRect(s,o);_drawAzureIcon(s,'expressroute');_drawShapeText(s);}
+  function _drawAzureFirewall(s,o){_baseRect(s,o);_drawAzureIcon(s,'azurefirewall');_drawShapeText(s);}
+  function _drawFrontDoor(s,o){_baseRect(s,o);_drawAzureIcon(s,'frontdoor');_drawShapeText(s);}
+  function _drawAzureDns(s,o){_baseRect(s,o);_drawAzureIcon(s,'azuredns');_drawShapeText(s);}
+  function _drawBastion(s,o){_baseRect(s,o);_drawAzureIcon(s,'bastion');_drawShapeText(s);}
+
+  // === Azure Integration shape renderers =========================
+  function _drawApim(s,o){_baseRect(s,o);_drawAzureIcon(s,'apim');_drawShapeText(s);}
+  function _drawServiceBus(s,o){_baseRect(s,o);_drawAzureIcon(s,'servicebus');_drawShapeText(s);}
+  function _drawEventGrid(s,o){_baseRect(s,o);_drawAzureIcon(s,'eventgrid');_drawShapeText(s);}
+  function _drawEventHubs(s,o){_baseRect(s,o);_drawAzureIcon(s,'eventhubs');_drawShapeText(s);}
+  function _drawLogicApps(s,o){_baseRect(s,o);_drawAzureIcon(s,'logicapps');_drawShapeText(s);}
+  function _drawAppConfig(s,o){_baseRect(s,o);_drawAzureIcon(s,'appconfig');_drawShapeText(s);}
+
+  // === Azure Security shape renderers ============================
+  function _drawKeyVault(s,o){_baseRect(s,o);_drawAzureIcon(s,'keyvault');_drawShapeText(s);}
+  function _drawSentinel(s,o){_baseRect(s,o);_drawAzureIcon(s,'sentinel');_drawShapeText(s);}
+  function _drawDefender(s,o){_baseRect(s,o);_drawAzureIcon(s,'defender');_drawShapeText(s);}
+  function _drawEntraId(s,o){_baseRect(s,o);_drawAzureIcon(s,'entraid');_drawShapeText(s);}
+  function _drawManagedId(s,o){_baseRect(s,o);_drawAzureIcon(s,'managedid');_drawShapeText(s);}
+
+  // === Azure DevOps & Monitoring shape renderers =================
+  function _drawAzureDevops(s,o){_baseRect(s,o);_drawAzureIcon(s,'azuredevops');_drawShapeText(s);}
+  function _drawAppInsights(s,o){_baseRect(s,o);_drawAzureIcon(s,'appinsights');_drawShapeText(s);}
+  function _drawLogAnalytics(s,o){_baseRect(s,o);_drawAzureIcon(s,'loganalytics');_drawShapeText(s);}
+  function _drawAzureMonitor(s,o){_baseRect(s,o);_drawAzureIcon(s,'azuremonitor');_drawShapeText(s);}
+  function _drawLoadTest(s,o){_baseRect(s,o);_drawAzureIcon(s,'loadtest');_drawShapeText(s);}
+
+  // === Azure AI & ML shape renderers =============================
+  function _drawOpenAi(s,o){_baseRect(s,o);_drawAzureIcon(s,'openai');_drawShapeText(s);}
+  function _drawCogServices(s,o){_baseRect(s,o);_drawAzureIcon(s,'cogservices');_drawShapeText(s);}
+  function _drawAzureMl(s,o){_baseRect(s,o);_drawAzureIcon(s,'azureml');_drawShapeText(s);}
+  function _drawBotService(s,o){_baseRect(s,o);_drawAzureIcon(s,'botservice');_drawShapeText(s);}
+  function _drawAiSearch(s,o){_baseRect(s,o);_drawAzureIcon(s,'aisearch');_drawShapeText(s);}
+  function _drawAiStudio(s,o){_baseRect(s,o);_drawAzureIcon(s,'aistudio');_drawShapeText(s);}
+
+  // === Azure IoT shape renderers =================================
+  function _drawIotHub(s,o){_baseRect(s,o);_drawAzureIcon(s,'iothub');_drawShapeText(s);}
+  function _drawIotCentral(s,o){_baseRect(s,o);_drawAzureIcon(s,'iotcentral');_drawShapeText(s);}
+  function _drawDigitalTwins(s,o){_baseRect(s,o);_drawAzureIcon(s,'digitaltwins');_drawShapeText(s);}
+  function _drawIotEdge(s,o){_baseRect(s,o);_drawAzureIcon(s,'iotedge');_drawShapeText(s);}
+
+  // === Azure Analytics shape renderers ============================
+  function _drawDatabricks(s,o){_baseRect(s,o);_drawAzureIcon(s,'databricks');_drawShapeText(s);}
+  function _drawHdInsight(s,o){_baseRect(s,o);_drawAzureIcon(s,'hdinsight');_drawShapeText(s);}
+  function _drawDataExplorer(s,o){_baseRect(s,o);_drawAzureIcon(s,'dataexplorer');_drawShapeText(s);}
+  function _drawPowerBi(s,o){_baseRect(s,o);_drawAzureIcon(s,'powerbi');_drawShapeText(s);}
 
   // ---------- END NEW SYSTEM SHAPE RENDERERS ----------
 
