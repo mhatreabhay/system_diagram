@@ -13,6 +13,8 @@ const Shapes = (() => {
     'pubsub', 'storage', 'function', 'container', 'eventbus',
     'browser', 'mobile', 'monitor', 'notification', 'auth',
     'externalapi', 'scheduler', 'logger', 'search', 'datawarehouse',
+    // Generic Storage
+    'objectstorage', 'blockstorage', 'fileshare', 'archivestorage',
     // Azure Storage
     'blobstorage', 'filestorage', 'queuestorage', 'tablestorage',
     'datalake', 'manageddisks',

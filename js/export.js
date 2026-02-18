@@ -303,6 +303,20 @@ const Export = (() => {
       case 'synapse':
         _exportSynapse(ctx, rc, shape, opts);
         break;
+
+      // Generic Storage shapes
+      case 'objectstorage':
+        _exportObjectStorage(ctx, rc, shape, opts);
+        break;
+      case 'blockstorage':
+        _exportBlockStorage(ctx, rc, shape, opts);
+        break;
+      case 'fileshare':
+        _exportFileShare(ctx, rc, shape, opts);
+        break;
+      case 'archivestorage':
+        _exportArchiveStorage(ctx, rc, shape, opts);
+        break;
     }
 
     ctx.globalAlpha = 1;
@@ -947,6 +961,32 @@ const Export = (() => {
   function _exportSynapse(ctx, rc, shape, opts) {
     _exportBaseRect(rc, shape, opts);
     _exportAzureIcon(ctx, shape, 'synapse');
+    _exportShapeText(ctx, shape);
+  }
+
+  // === Generic Storage export renderers ===
+
+  function _exportObjectStorage(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportIcon(ctx, shape, '\u{1F4E6}', '#f97316');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportBlockStorage(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportIcon(ctx, shape, '\u{1F4BF}', '#6366f1');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportFileShare(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportIcon(ctx, shape, '\u{1F4C1}', '#0ea5e9');
+    _exportShapeText(ctx, shape);
+  }
+
+  function _exportArchiveStorage(ctx, rc, shape, opts) {
+    _exportBaseRect(rc, shape, opts);
+    _exportIcon(ctx, shape, '\u{1F5C4}', '#78716c');
     _exportShapeText(ctx, shape);
   }
 

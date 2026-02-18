@@ -391,6 +391,20 @@ const CanvasView = (() => {
         _drawManagedDisks(shape, opts);
         break;
 
+      // Generic Storage shapes
+      case 'objectstorage':
+        _drawObjectStorage(shape, opts);
+        break;
+      case 'blockstorage':
+        _drawBlockStorage(shape, opts);
+        break;
+      case 'fileshare':
+        _drawFileShare(shape, opts);
+        break;
+      case 'archivestorage':
+        _drawArchiveStorage(shape, opts);
+        break;
+
       // Azure Database shapes
       case 'azuresql':
         _drawAzureSql(shape, opts);
@@ -1042,6 +1056,32 @@ const CanvasView = (() => {
   function _drawManagedDisks(shape, opts) {
     _baseRect(shape, opts);
     _drawAzureIcon(shape, 'manageddisks');
+    _drawShapeText(shape);
+  }
+
+  // === Generic Storage shape renderers ============================
+
+  function _drawObjectStorage(shape, opts) {
+    _baseRect(shape, opts);
+    _drawIcon(shape, '\u{1F4E6}', '#f97316');
+    _drawShapeText(shape);
+  }
+
+  function _drawBlockStorage(shape, opts) {
+    _baseRect(shape, opts);
+    _drawIcon(shape, '\u{1F4BF}', '#6366f1');
+    _drawShapeText(shape);
+  }
+
+  function _drawFileShare(shape, opts) {
+    _baseRect(shape, opts);
+    _drawIcon(shape, '\u{1F4C1}', '#0ea5e9');
+    _drawShapeText(shape);
+  }
+
+  function _drawArchiveStorage(shape, opts) {
+    _baseRect(shape, opts);
+    _drawIcon(shape, '\u{1F5C4}', '#78716c');
     _drawShapeText(shape);
   }
 

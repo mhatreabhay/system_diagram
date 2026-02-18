@@ -182,6 +182,10 @@ const Tools = (() => {
       case 'tablestorage':
       case 'datalake':
       case 'manageddisks':
+      case 'objectstorage':
+      case 'blockstorage':
+      case 'fileshare':
+      case 'archivestorage':
       case 'azuresql':
       case 'cosmosdb':
       case 'azuremysql':
@@ -424,6 +428,10 @@ const Tools = (() => {
       case 'tablestorage':
       case 'datalake':
       case 'manageddisks':
+      case 'objectstorage':
+      case 'blockstorage':
+      case 'fileshare':
+      case 'archivestorage':
       case 'azuresql':
       case 'cosmosdb':
       case 'azuremysql':
