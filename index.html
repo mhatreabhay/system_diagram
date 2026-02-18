@@ -168,15 +168,25 @@
   <div id="mainContainer">
     <!-- Left Shape Ribbon -->
     <div id="shapeRibbon">
-      <div class="ribbon-category" data-category="data">
-        <div class="ribbon-icon" title="Data">🗃</div>
+      <div class="ribbon-category" data-category="database">
+        <div class="ribbon-icon" title="Database"><svg width="20" height="20" viewBox="0 0 20 20"><ellipse cx="10" cy="5" rx="7" ry="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 5v10c0 1.66 3.13 3 7 3s7-1.34 7-3V5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></div>
         <div class="ribbon-flyout">
-          <div class="flyout-title">Data</div>
+          <div class="flyout-title">Database</div>
           <button class="ribbon-item" data-systool="database" data-label="Database">🗃 Database</button>
           <button class="ribbon-item" data-systool="cache" data-label="Cache">&#9889; Cache</button>
           <button class="ribbon-item" data-systool="storage" data-label="Storage">📦 Storage</button>
           <button class="ribbon-item" data-systool="datawarehouse" data-label="Data Warehouse">🏢 Data Warehouse</button>
           <button class="ribbon-item" data-systool="search" data-label="Search">🔍 Search</button>
+          <hr class="flyout-divider">
+          <div class="flyout-subtitle">Azure</div>
+          <button class="ribbon-item" data-systool="azuresql" data-label="Azure SQL">&#x1F4BE; Azure SQL</button>
+          <button class="ribbon-item" data-systool="cosmosdb" data-label="Cosmos DB">&#x1F30D; Cosmos DB</button>
+          <button class="ribbon-item" data-systool="azuremysql" data-label="Azure MySQL">&#x1F42C; Azure MySQL</button>
+          <button class="ribbon-item" data-systool="azurepostgres" data-label="Azure PostgreSQL">&#x1F418; Azure PostgreSQL</button>
+          <button class="ribbon-item" data-systool="sqlmanaged" data-label="SQL Managed Instance">&#x1F3E2; SQL Managed Instance</button>
+          <button class="ribbon-item" data-systool="rediscache" data-label="Redis Cache">&#x26A1; Redis Cache</button>
+          <button class="ribbon-item" data-systool="datafactory" data-label="Data Factory">&#x1F3ED; Data Factory</button>
+          <button class="ribbon-item" data-systool="synapse" data-label="Synapse Analytics">&#x1F4CA; Synapse Analytics</button>
         </div>
       </div>
       <div class="ribbon-category" data-category="compute">
@@ -234,20 +244,6 @@
           <button class="ribbon-item" data-systool="notification" data-label="Notification">🔔 Notification</button>
           <button class="ribbon-item" data-systool="auth" data-label="Auth">🔒 Auth</button>
           <button class="ribbon-item" data-systool="externalapi" data-label="External API">🔗 External API</button>
-        </div>
-      </div>
-      <div class="ribbon-category" data-category="azuredatabase">
-        <div class="ribbon-icon" title="Azure Database">&#x1F5C4;</div>
-        <div class="ribbon-flyout">
-          <div class="flyout-title">Azure Database</div>
-          <button class="ribbon-item" data-systool="azuresql" data-label="Azure SQL">&#x1F4BE; Azure SQL</button>
-          <button class="ribbon-item" data-systool="cosmosdb" data-label="Cosmos DB">&#x1F30D; Cosmos DB</button>
-          <button class="ribbon-item" data-systool="azuremysql" data-label="Azure MySQL">&#x1F42C; Azure MySQL</button>
-          <button class="ribbon-item" data-systool="azurepostgres" data-label="Azure PostgreSQL">&#x1F418; Azure PostgreSQL</button>
-          <button class="ribbon-item" data-systool="sqlmanaged" data-label="SQL Managed Instance">&#x1F3E2; SQL Managed Instance</button>
-          <button class="ribbon-item" data-systool="rediscache" data-label="Redis Cache">&#x26A1; Redis Cache</button>
-          <button class="ribbon-item" data-systool="datafactory" data-label="Data Factory">&#x1F3ED; Data Factory</button>
-          <button class="ribbon-item" data-systool="synapse" data-label="Synapse Analytics">&#x1F4CA; Synapse Analytics</button>
         </div>
       </div>
       <div class="ribbon-category" data-category="azurestorage">

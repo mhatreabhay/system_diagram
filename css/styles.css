@@ -467,6 +467,21 @@ html, body {
   padding: 6px 12px 4px;
 }
 
+.flyout-divider {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 4px 10px;
+}
+
+.flyout-subtitle {
+  font-size: 10px;
+  font-weight: 600;
+  color: #0078d4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 12px 2px;
+}
+
 .ribbon-item {
   display: block;
   width: 100%;
