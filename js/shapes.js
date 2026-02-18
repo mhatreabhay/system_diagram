@@ -13,6 +13,9 @@ const Shapes = (() => {
     'pubsub', 'storage', 'function', 'container', 'eventbus',
     'browser', 'mobile', 'monitor', 'notification', 'auth',
     'externalapi', 'scheduler', 'logger', 'search', 'datawarehouse',
+    // Azure Storage
+    'blobstorage', 'filestorage', 'queuestorage', 'tablestorage',
+    'datalake', 'manageddisks',
   ]);
 
   /**

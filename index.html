@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SystemDraw — System Design Diagrams</title>
-  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/styles.css?v=3">
   <!-- Rough.js for hand-drawn aesthetic -->
   <script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.min.js"></script>
 </head>
@@ -236,6 +236,18 @@
           <button class="ribbon-item" data-systool="externalapi" data-label="External API">🔗 External API</button>
         </div>
       </div>
+      <div class="ribbon-category" data-category="azurestorage">
+        <div class="ribbon-icon" title="Azure Storage">☁</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Azure Storage</div>
+          <button class="ribbon-item" data-systool="blobstorage" data-label="Blob Storage">&#x1F4E6; Blob Storage</button>
+          <button class="ribbon-item" data-systool="filestorage" data-label="File Storage">&#x1F4C1; File Storage</button>
+          <button class="ribbon-item" data-systool="queuestorage" data-label="Queue Storage">&#x1F4EC; Queue Storage</button>
+          <button class="ribbon-item" data-systool="tablestorage" data-label="Table Storage">&#x1F4CA; Table Storage</button>
+          <button class="ribbon-item" data-systool="datalake" data-label="Data Lake">&#x1F30A; Data Lake</button>
+          <button class="ribbon-item" data-systool="manageddisks" data-label="Managed Disks">&#x1F4BF; Managed Disks</button>
+        </div>
+      </div>
     </div>
 
     <!-- Canvas -->
@@ -360,13 +372,13 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/utils.js?v=2"></script>
-  <script src="js/shapes.js?v=2"></script>
-  <script src="js/history.js?v=2"></script>
-  <script src="js/canvas.js?v=2"></script>
-  <script src="js/connectors.js?v=2"></script>
-  <script src="js/tools.js?v=2"></script>
-  <script src="js/export.js?v=2"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/utils.js?v=3"></script>
+  <script src="js/shapes.js?v=3"></script>
+  <script src="js/history.js?v=3"></script>
+  <script src="js/canvas.js?v=3"></script>
+  <script src="js/connectors.js?v=3"></script>
+  <script src="js/tools.js?v=3"></script>
+  <script src="js/export.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
 </body>
 </html>

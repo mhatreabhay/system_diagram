@@ -339,6 +339,26 @@ const CanvasView = (() => {
       case 'datawarehouse':
         _drawDataWarehouse(shape, opts);
         break;
+
+      // Azure Storage shapes
+      case 'blobstorage':
+        _drawBlobStorage(shape, opts);
+        break;
+      case 'filestorage':
+        _drawFileStorage(shape, opts);
+        break;
+      case 'queuestorage':
+        _drawQueueStorage(shape, opts);
+        break;
+      case 'tablestorage':
+        _drawTableStorage(shape, opts);
+        break;
+      case 'datalake':
+        _drawDataLake(shape, opts);
+        break;
+      case 'manageddisks':
+        _drawManagedDisks(shape, opts);
+        break;
     }
 
     ctx.globalAlpha = 1;
@@ -918,6 +938,147 @@ const CanvasView = (() => {
         opts
       );
     }
+    _drawShapeText(shape);
+  }
+
+  // === Azure Storage shape renderers ============================
+
+  /** Blob Storage — rect with stacked circles icon */
+  function _drawBlobStorage(shape, opts) {
+    _baseRect(shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#0078d4';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const ix = x + w - 18, iy = y + 5, r = 3;
+    // Three stacked circles (blobs)
+    ctx.beginPath(); ctx.arc(ix + 6, iy + 3, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ix + 3, iy + 10, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ix + 9, iy + 10, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+    _drawShapeText(shape);
+  }
+
+  /** File Storage — rect with folder/file icon */
+  function _drawFileStorage(shape, opts) {
+    _baseRect(shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#0078d4';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const ix = x + w - 18, iy = y + 5;
+    // Folder shape
+    ctx.beginPath();
+    ctx.moveTo(ix, iy + 3);
+    ctx.lineTo(ix, iy + 14);
+    ctx.lineTo(ix + 14, iy + 14);
+    ctx.lineTo(ix + 14, iy + 3);
+    ctx.lineTo(ix + 7, iy + 3);
+    ctx.lineTo(ix + 5, iy);
+    ctx.lineTo(ix, iy);
+    ctx.closePath();
+    ctx.stroke();
+    // Horizontal line for folder tab
+    ctx.beginPath();
+    ctx.moveTo(ix, iy + 3);
+    ctx.lineTo(ix + 14, iy + 3);
+    ctx.stroke();
+    ctx.restore();
+    _drawShapeText(shape);
+  }
+
+  /** Queue Storage — rect with stacked horizontal bars icon */
+  function _drawQueueStorage(shape, opts) {
+    _baseRect(shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#0078d4';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const ix = x + w - 18, iy = y + 5;
+    // Three horizontal bars (queue messages)
+    for (let i = 0; i < 3; i++) {
+      const by = iy + i * 5;
+      ctx.beginPath();
+      ctx.rect(ix, by, 13, 3);
+      ctx.stroke();
+    }
+    // Arrow at bottom
+    ctx.beginPath();
+    ctx.moveTo(ix + 3, iy + 15);
+    ctx.lineTo(ix + 10, iy + 15);
+    ctx.moveTo(ix + 8, iy + 13);
+    ctx.lineTo(ix + 10, iy + 15);
+    ctx.lineTo(ix + 8, iy + 17);
+    ctx.stroke();
+    ctx.restore();
+    _drawShapeText(shape);
+  }
+
+  /** Table Storage — rect with grid/table icon */
+  function _drawTableStorage(shape, opts) {
+    _baseRect(shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#0078d4';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const ix = x + w - 18, iy = y + 4;
+    // Table grid
+    ctx.beginPath(); ctx.rect(ix, iy, 14, 14); ctx.stroke();
+    // Horizontal lines
+    ctx.beginPath(); ctx.moveTo(ix, iy + 5); ctx.lineTo(ix + 14, iy + 5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ix, iy + 9.5); ctx.lineTo(ix + 14, iy + 9.5); ctx.stroke();
+    // Vertical line
+    ctx.beginPath(); ctx.moveTo(ix + 5, iy); ctx.lineTo(ix + 5, iy + 14); ctx.stroke();
+    ctx.restore();
+    _drawShapeText(shape);
+  }
+
+  /** Data Lake — rect with wave icon */
+  function _drawDataLake(shape, opts) {
+    _baseRect(shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#0078d4';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const ix = x + w - 20, iy = y + 5;
+    // Water waves
+    for (let row = 0; row < 3; row++) {
+      const wy = iy + row * 5;
+      ctx.beginPath();
+      ctx.moveTo(ix, wy + 2);
+      ctx.bezierCurveTo(ix + 4, wy, ix + 8, wy + 4, ix + 12, wy + 2);
+      ctx.lineTo(ix + 15, wy + 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+    _drawShapeText(shape);
+  }
+
+  /** Managed Disks — rect with stacked disk icon */
+  function _drawManagedDisks(shape, opts) {
+    _baseRect(shape, opts);
+    const { x, y, width: w, height: h } = shape;
+    ctx.save();
+    ctx.strokeStyle = '#0078d4';
+    ctx.lineWidth = Math.max(1.2, (shape.strokeWidth || 2) * 0.6);
+    const ix = x + w - 18, iy = y + 4;
+    // Stacked disks (like a DB cylinder but flatter)
+    const dw = 14, dh = 4;
+    for (let i = 0; i < 3; i++) {
+      const dy = iy + i * 5;
+      ctx.beginPath();
+      ctx.ellipse(ix + dw / 2, dy, dw / 2, dh / 2, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      if (i < 2) {
+        ctx.beginPath();
+        ctx.moveTo(ix, dy);
+        ctx.lineTo(ix, dy + 5);
+        ctx.moveTo(ix + dw, dy);
+        ctx.lineTo(ix + dw, dy + 5);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
     _drawShapeText(shape);
   }
 

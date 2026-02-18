@@ -175,7 +175,13 @@ const Tools = (() => {
       case 'scheduler':
       case 'logger':
       case 'search':
-      case 'datawarehouse': {
+      case 'datawarehouse':
+      case 'blobstorage':
+      case 'filestorage':
+      case 'queuestorage':
+      case 'tablestorage':
+      case 'datalake':
+      case 'manageddisks': {
         // Firewall gets default red color scheme
         let shapeStroke = strokeColor;
         let shapeFill = fillEnabled ? fillColor : 'transparent';
@@ -403,7 +409,13 @@ const Tools = (() => {
       case 'scheduler':
       case 'logger':
       case 'search':
-      case 'datawarehouse': {
+      case 'datawarehouse':
+      case 'blobstorage':
+      case 'filestorage':
+      case 'queuestorage':
+      case 'tablestorage':
+      case 'datalake':
+      case 'manageddisks': {
         const bounds = Utils.normalizeBounds(
           dragStartWorld.x, dragStartWorld.y, world.x, world.y
         );
