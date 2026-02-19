@@ -1,5 +1,6 @@
 # IDE / Editor
 .vscode/
+!.vscode/mcp.json
 .idea/
 *.swp
 *.swo

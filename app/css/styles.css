@@ -356,6 +356,16 @@ html, body {
   font-weight: 600;
 }
 
+.export-arch-btn {
+  background: #0e639c;
+  color: #fff;
+  border-color: #0e639c;
+}
+.export-arch-btn:hover {
+  background: #1177bb;
+  border-color: #1177bb;
+}
+
 /* Color swatches */
 .color-swatch {
   display: block;

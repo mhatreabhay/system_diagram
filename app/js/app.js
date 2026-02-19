@@ -189,6 +189,7 @@
 
   exportPngBtn.addEventListener('click', () => Export.toPNG(Tools.getShapes()));
   exportJsonBtn.addEventListener('click', () => Export.toJSON(Tools.getShapes()));
+  document.getElementById('exportArchBtn').addEventListener('click', () => Export.toArchitecture(Tools.getShapes()));
   importJsonBtn.addEventListener('click', () => importFileInput.click());
   importFileInput.addEventListener('change', (e) => {
     if (e.target.files[0]) {

@@ -1187,5 +1187,259 @@ const Export = (() => {
     return null;
   }
 
-  return { toPNG, toJSON, fromJSON, autoSave, autoLoad };
+  // ── Architecture Export (for MCP / Copilot integration) ───────────────
+
+  /**
+   * Semantic metadata for each shape type.
+   * Maps internal type → { category, service, provider, description }
+   */
+  const SHAPE_META = {
+    // ─── Generic shapes ────────────────────────────
+    rectangle:     { category: 'primitive',  service: 'Rectangle',           provider: 'generic' },
+    ellipse:       { category: 'primitive',  service: 'Ellipse',             provider: 'generic' },
+    diamond:       { category: 'primitive',  service: 'Diamond',             provider: 'generic' },
+    text:          { category: 'primitive',  service: 'Text',                provider: 'generic' },
+
+    // ─── Generic system shapes ─────────────────────
+    database:      { category: 'database',   service: 'Database',            provider: 'generic',  description: 'Relational or NoSQL database' },
+    cache:         { category: 'database',   service: 'Cache',               provider: 'generic',  description: 'In-memory caching layer' },
+    datawarehouse: { category: 'database',   service: 'Data Warehouse',      provider: 'generic',  description: 'Analytical data warehouse' },
+    search:        { category: 'database',   service: 'Search Engine',       provider: 'generic',  description: 'Full-text search service' },
+    server:        { category: 'compute',    service: 'Server',              provider: 'generic',  description: 'Application server' },
+    microservice:  { category: 'compute',    service: 'Microservice',        provider: 'generic',  description: 'Microservice component' },
+    function:      { category: 'compute',    service: 'Serverless Function', provider: 'generic',  description: 'Serverless function / FaaS' },
+    container:     { category: 'compute',    service: 'Container',           provider: 'generic',  description: 'Container workload' },
+    loadbalancer:  { category: 'network',    service: 'Load Balancer',       provider: 'generic',  description: 'Traffic load balancer' },
+    apigateway:    { category: 'network',    service: 'API Gateway',         provider: 'generic',  description: 'API gateway / reverse proxy' },
+    cdn:           { category: 'network',    service: 'CDN',                 provider: 'generic',  description: 'Content delivery network' },
+    cloud:         { category: 'network',    service: 'Cloud',               provider: 'generic',  description: 'Cloud boundary / provider' },
+    firewall:      { category: 'network',    service: 'Firewall',            provider: 'generic',  description: 'Network firewall' },
+    queue:         { category: 'messaging',  service: 'Message Queue',       provider: 'generic',  description: 'Message queue (FIFO)' },
+    pubsub:        { category: 'messaging',  service: 'Pub/Sub',             provider: 'generic',  description: 'Publish-subscribe messaging' },
+    eventbus:      { category: 'messaging',  service: 'Event Bus',           provider: 'generic',  description: 'Event bus / event-driven messaging' },
+    user:          { category: 'client',     service: 'User',                provider: 'generic',  description: 'End user / actor' },
+    browser:       { category: 'client',     service: 'Browser',             provider: 'generic',  description: 'Web browser client' },
+    mobile:        { category: 'client',     service: 'Mobile App',          provider: 'generic',  description: 'Mobile application client' },
+    monitor:       { category: 'ops',        service: 'Monitor',             provider: 'generic',  description: 'Monitoring dashboard' },
+    logger:        { category: 'ops',        service: 'Logger',              provider: 'generic',  description: 'Logging service' },
+    scheduler:     { category: 'ops',        service: 'Scheduler',           provider: 'generic',  description: 'Task scheduler / cron' },
+    notification:  { category: 'integration',service: 'Notification',        provider: 'generic',  description: 'Notification / alerting service' },
+    auth:          { category: 'security',   service: 'Auth',                provider: 'generic',  description: 'Authentication / authorization' },
+    externalapi:   { category: 'integration',service: 'External API',        provider: 'generic',  description: 'Third-party API integration' },
+    storage:       { category: 'storage',    service: 'Storage',             provider: 'generic',  description: 'Generic storage' },
+    objectstorage: { category: 'storage',    service: 'Object Storage',      provider: 'generic',  description: 'Object / blob storage (S3-like)' },
+    blockstorage:  { category: 'storage',    service: 'Block Storage',       provider: 'generic',  description: 'Block-level storage volumes' },
+    fileshare:     { category: 'storage',    service: 'File Share',          provider: 'generic',  description: 'Network file share (NFS/SMB)' },
+    archivestorage:{ category: 'storage',    service: 'Archive Storage',     provider: 'generic',  description: 'Cold / archive tier storage' },
+
+    // ─── Azure Database ────────────────────────────
+    azuresql:      { category: 'database',   service: 'Azure SQL Database',         provider: 'azure', azureService: 'Microsoft.Sql/servers',                 description: 'Managed SQL Server database' },
+    cosmosdb:      { category: 'database',   service: 'Azure Cosmos DB',            provider: 'azure', azureService: 'Microsoft.DocumentDB/databaseAccounts', description: 'Globally-distributed multi-model database' },
+    azuremysql:    { category: 'database',   service: 'Azure Database for MySQL',   provider: 'azure', azureService: 'Microsoft.DBforMySQL/flexibleServers',  description: 'Managed MySQL database' },
+    azurepostgres: { category: 'database',   service: 'Azure Database for PostgreSQL', provider: 'azure', azureService: 'Microsoft.DBforPostgreSQL/flexibleServers', description: 'Managed PostgreSQL database' },
+    sqlmanaged:    { category: 'database',   service: 'SQL Managed Instance',       provider: 'azure', azureService: 'Microsoft.Sql/managedInstances',        description: 'SQL Server managed instance' },
+    rediscache:    { category: 'database',   service: 'Azure Cache for Redis',      provider: 'azure', azureService: 'Microsoft.Cache/redis',                 description: 'Managed Redis cache' },
+    datafactory:   { category: 'database',   service: 'Azure Data Factory',         provider: 'azure', azureService: 'Microsoft.DataFactory/factories',       description: 'Data integration / ETL service' },
+    synapse:       { category: 'database',   service: 'Azure Synapse Analytics',    provider: 'azure', azureService: 'Microsoft.Synapse/workspaces',          description: 'Unified analytics platform' },
+
+    // ─── Azure Compute ─────────────────────────────
+    azurevm:       { category: 'compute',    service: 'Azure Virtual Machine',      provider: 'azure', azureService: 'Microsoft.Compute/virtualMachines',     description: 'IaaS virtual machine' },
+    appservice:    { category: 'compute',    service: 'Azure App Service',          provider: 'azure', azureService: 'Microsoft.Web/sites',                   description: 'Managed web app hosting (PaaS)' },
+    azurefunc:     { category: 'compute',    service: 'Azure Functions',            provider: 'azure', azureService: 'Microsoft.Web/sites',                   description: 'Serverless compute (Functions)' },
+    aks:           { category: 'compute',    service: 'Azure Kubernetes Service',   provider: 'azure', azureService: 'Microsoft.ContainerService/managedClusters', description: 'Managed Kubernetes cluster' },
+    aci:           { category: 'compute',    service: 'Azure Container Instances',  provider: 'azure', azureService: 'Microsoft.ContainerInstance/containerGroups', description: 'Serverless container instances' },
+    springapps:    { category: 'compute',    service: 'Azure Spring Apps',          provider: 'azure', azureService: 'Microsoft.AppPlatform/Spring',          description: 'Managed Spring Boot hosting' },
+
+    // ─── Azure Networking ──────────────────────────
+    vnet:          { category: 'network',    service: 'Azure Virtual Network',      provider: 'azure', azureService: 'Microsoft.Network/virtualNetworks',     description: 'Virtual network (VNet)' },
+    azurelb:       { category: 'network',    service: 'Azure Load Balancer',        provider: 'azure', azureService: 'Microsoft.Network/loadBalancers',       description: 'Layer-4 load balancer' },
+    appgateway:    { category: 'network',    service: 'Azure Application Gateway', provider: 'azure', azureService: 'Microsoft.Network/applicationGateways', description: 'Layer-7 application gateway / WAF' },
+    expressroute:  { category: 'network',    service: 'Azure ExpressRoute',         provider: 'azure', azureService: 'Microsoft.Network/expressRouteCircuits',description: 'Private connection to Azure' },
+    azurefirewall: { category: 'network',    service: 'Azure Firewall',             provider: 'azure', azureService: 'Microsoft.Network/azureFirewalls',      description: 'Cloud-native network firewall' },
+    frontdoor:     { category: 'network',    service: 'Azure Front Door',           provider: 'azure', azureService: 'Microsoft.Cdn/profiles',                description: 'Global CDN + load balancer + WAF' },
+    azuredns:      { category: 'network',    service: 'Azure DNS',                  provider: 'azure', azureService: 'Microsoft.Network/dnsZones',            description: 'DNS hosting service' },
+    bastion:       { category: 'network',    service: 'Azure Bastion',              provider: 'azure', azureService: 'Microsoft.Network/bastionHosts',        description: 'Secure RDP/SSH jump host' },
+
+    // ─── Azure Messaging / Integration ─────────────
+    apim:          { category: 'messaging',  service: 'Azure API Management',       provider: 'azure', azureService: 'Microsoft.ApiManagement/service',       description: 'API management gateway' },
+    servicebus:    { category: 'messaging',  service: 'Azure Service Bus',          provider: 'azure', azureService: 'Microsoft.ServiceBus/namespaces',       description: 'Enterprise message broker' },
+    eventgrid:     { category: 'messaging',  service: 'Azure Event Grid',           provider: 'azure', azureService: 'Microsoft.EventGrid/topics',            description: 'Event routing service' },
+    eventhubs:     { category: 'messaging',  service: 'Azure Event Hubs',           provider: 'azure', azureService: 'Microsoft.EventHub/namespaces',         description: 'Big data event streaming' },
+    logicapps:     { category: 'messaging',  service: 'Azure Logic Apps',           provider: 'azure', azureService: 'Microsoft.Logic/workflows',             description: 'Workflow automation (low-code)' },
+    appconfig:     { category: 'messaging',  service: 'Azure App Configuration',    provider: 'azure', azureService: 'Microsoft.AppConfiguration/configurationStores', description: 'Centralized app configuration' },
+
+    // ─── Azure Security ────────────────────────────
+    keyvault:      { category: 'security',   service: 'Azure Key Vault',            provider: 'azure', azureService: 'Microsoft.KeyVault/vaults',             description: 'Secrets, keys & certificate management' },
+    sentinel:      { category: 'security',   service: 'Microsoft Sentinel',         provider: 'azure', azureService: 'Microsoft.SecurityInsights',            description: 'Cloud-native SIEM' },
+    defender:      { category: 'security',   service: 'Microsoft Defender for Cloud',provider: 'azure', azureService: 'Microsoft.Security',                   description: 'Cloud security posture management' },
+    entraid:       { category: 'security',   service: 'Microsoft Entra ID',         provider: 'azure', azureService: 'Microsoft.AzureActiveDirectory',        description: 'Identity & access management' },
+    managedid:     { category: 'security',   service: 'Managed Identity',           provider: 'azure', azureService: 'Microsoft.ManagedIdentity/userAssignedIdentities', description: 'Managed identity for Azure resources' },
+
+    // ─── Azure DevOps & Monitoring ─────────────────
+    azuredevops:   { category: 'ops',        service: 'Azure DevOps',               provider: 'azure', description: 'CI/CD and project management' },
+    appinsights:   { category: 'ops',        service: 'Application Insights',       provider: 'azure', azureService: 'Microsoft.Insights/components',         description: 'APM and diagnostics' },
+    loganalytics:  { category: 'ops',        service: 'Log Analytics',              provider: 'azure', azureService: 'Microsoft.OperationalInsights/workspaces', description: 'Log aggregation and query' },
+    azuremonitor:  { category: 'ops',        service: 'Azure Monitor',              provider: 'azure', azureService: 'Microsoft.Insights',                    description: 'Full-stack monitoring' },
+    loadtest:      { category: 'ops',        service: 'Azure Load Testing',         provider: 'azure', azureService: 'Microsoft.LoadTestService/loadTests',   description: 'Cloud-based load testing' },
+
+    // ─── Azure Storage ─────────────────────────────
+    blobstorage:   { category: 'storage',    service: 'Azure Blob Storage',         provider: 'azure', azureService: 'Microsoft.Storage/storageAccounts',     description: 'Object / blob storage' },
+    filestorage:   { category: 'storage',    service: 'Azure Files',                provider: 'azure', azureService: 'Microsoft.Storage/storageAccounts',     description: 'Managed file shares (SMB/NFS)' },
+    queuestorage:  { category: 'storage',    service: 'Azure Queue Storage',        provider: 'azure', azureService: 'Microsoft.Storage/storageAccounts',     description: 'Simple message queue storage' },
+    tablestorage:  { category: 'storage',    service: 'Azure Table Storage',        provider: 'azure', azureService: 'Microsoft.Storage/storageAccounts',     description: 'NoSQL key-value table storage' },
+    datalake:      { category: 'storage',    service: 'Azure Data Lake Storage',    provider: 'azure', azureService: 'Microsoft.Storage/storageAccounts',     description: 'Hierarchical data lake (ADLS Gen2)' },
+    manageddisks:  { category: 'storage',    service: 'Azure Managed Disks',        provider: 'azure', azureService: 'Microsoft.Compute/disks',               description: 'Block-level managed disks' },
+
+    // ─── Azure AI & ML ─────────────────────────────
+    openai:        { category: 'ai',         service: 'Azure OpenAI Service',       provider: 'azure', azureService: 'Microsoft.CognitiveServices/accounts',  description: 'GPT, DALL-E, Embeddings' },
+    cogservices:   { category: 'ai',         service: 'Azure Cognitive Services',   provider: 'azure', azureService: 'Microsoft.CognitiveServices/accounts',  description: 'Vision, Speech, Language, Decision' },
+    azureml:       { category: 'ai',         service: 'Azure Machine Learning',     provider: 'azure', azureService: 'Microsoft.MachineLearningServices/workspaces', description: 'ML model training & deployment' },
+    botservice:    { category: 'ai',         service: 'Azure Bot Service',          provider: 'azure', azureService: 'Microsoft.BotService/botServices',      description: 'Conversational AI bot framework' },
+    aisearch:      { category: 'ai',         service: 'Azure AI Search',            provider: 'azure', azureService: 'Microsoft.Search/searchServices',       description: 'AI-powered search (formerly Cognitive Search)' },
+    aistudio:      { category: 'ai',         service: 'Azure AI Studio',            provider: 'azure', description: 'Unified AI development platform' },
+
+    // ─── Azure IoT ─────────────────────────────────
+    iothub:        { category: 'iot',        service: 'Azure IoT Hub',              provider: 'azure', azureService: 'Microsoft.Devices/IotHubs',             description: 'IoT device connectivity & management' },
+    iotcentral:    { category: 'iot',        service: 'Azure IoT Central',          provider: 'azure', azureService: 'Microsoft.IoTCentral/iotApps',          description: 'IoT SaaS application platform' },
+    digitaltwins:  { category: 'iot',        service: 'Azure Digital Twins',        provider: 'azure', azureService: 'Microsoft.DigitalTwins/digitalTwinsInstances', description: 'Digital twin modeling' },
+    iotedge:       { category: 'iot',        service: 'Azure IoT Edge',             provider: 'azure', azureService: 'Microsoft.Devices/IotHubs',             description: 'Edge compute for IoT devices' },
+
+    // ─── Azure Analytics ───────────────────────────
+    databricks:    { category: 'analytics',  service: 'Azure Databricks',           provider: 'azure', azureService: 'Microsoft.Databricks/workspaces',       description: 'Apache Spark analytics platform' },
+    hdinsight:     { category: 'analytics',  service: 'Azure HDInsight',            provider: 'azure', azureService: 'Microsoft.HDInsight/clusters',          description: 'Managed Hadoop / Spark clusters' },
+    dataexplorer:  { category: 'analytics',  service: 'Azure Data Explorer',        provider: 'azure', azureService: 'Microsoft.Kusto/clusters',              description: 'Real-time data analytics (Kusto)' },
+    powerbi:       { category: 'analytics',  service: 'Power BI',                   provider: 'azure', description: 'Business intelligence & dashboards' },
+  };
+
+  /**
+   * Export the canvas as a semantic architecture manifest (.archsketch.json).
+   * This format is designed for MCP server / Copilot consumption.
+   */
+  function toArchitecture(shapes) {
+    if (shapes.length === 0) {
+      alert('Canvas is empty — nothing to export.');
+      return;
+    }
+
+    const connectorTypes = new Set(['line', 'arrow', 'freehand']);
+    const components = [];
+    const connections = [];
+
+    // Build a quick lookup: shape id → component info
+    const shapeMap = new Map();
+
+    for (const shape of shapes) {
+      if (connectorTypes.has(shape.type)) continue; // handle separately
+      const meta = SHAPE_META[shape.type] || { category: 'unknown', service: shape.type, provider: 'generic' };
+      const component = {
+        id: shape.id,
+        type: shape.type,
+        label: shape.text || meta.service,
+        category: meta.category,
+        service: meta.service,
+        provider: meta.provider,
+        description: meta.description || '',
+        position: { x: Math.round(shape.x), y: Math.round(shape.y) },
+        size: { width: Math.round(shape.width), height: Math.round(shape.height) },
+      };
+      if (meta.azureService) {
+        component.azureResourceType = meta.azureService;
+      }
+      // Include user-visible properties that might inform code generation
+      if (shape.fillColor && shape.fillColor !== 'transparent') {
+        component.style = { fillColor: shape.fillColor };
+      }
+      components.push(component);
+      shapeMap.set(shape.id, component);
+    }
+
+    // Process connectors (arrows, lines, freehand)
+    for (const shape of shapes) {
+      if (!connectorTypes.has(shape.type)) continue;
+
+      const connection = {
+        id: shape.id,
+        type: shape.type === 'arrow' ? 'directed' : (shape.type === 'freehand' ? 'freehand' : 'undirected'),
+        label: shape.text || '',
+      };
+
+      // Resolve start binding
+      if (shape.startBinding) {
+        const src = shapeMap.get(shape.startBinding.shapeId);
+        connection.from = shape.startBinding.shapeId;
+        connection.fromLabel = src ? src.label : null;
+      } else if (shape.points && shape.points.length > 0) {
+        // No binding — try to find overlapping shape at start point
+        const pt = shape.points[0];
+        const hit = _findShapeAtPoint(shapes, pt.x, pt.y, connectorTypes);
+        connection.from = hit ? hit.id : null;
+        connection.fromLabel = hit ? (shapeMap.get(hit.id) || {}).label : null;
+      }
+
+      // Resolve end binding
+      if (shape.endBinding) {
+        const tgt = shapeMap.get(shape.endBinding.shapeId);
+        connection.to = shape.endBinding.shapeId;
+        connection.toLabel = tgt ? tgt.label : null;
+      } else if (shape.points && shape.points.length >= 2) {
+        const pt = shape.points[shape.points.length - 1];
+        const hit = _findShapeAtPoint(shapes, pt.x, pt.y, connectorTypes);
+        connection.to = hit ? hit.id : null;
+        connection.toLabel = hit ? (shapeMap.get(hit.id) || {}).label : null;
+      }
+
+      connections.push(connection);
+    }
+
+    const manifest = {
+      $schema: 'https://archsketch.com/schema/v1.json',
+      version: 1,
+      appName: 'ArchSketch',
+      exportedAt: new Date().toISOString(),
+      components,
+      connections,
+      summary: _generateSummary(components, connections),
+    };
+
+    const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.download = 'architecture.archsketch.json';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  /**
+   * Find the shape (non-connector) under a given point.
+   */
+  function _findShapeAtPoint(shapes, x, y, excludeTypes) {
+    for (let i = shapes.length - 1; i >= 0; i--) {
+      const s = shapes[i];
+      if (excludeTypes.has(s.type)) continue;
+      const b = Shapes.getBounds(s);
+      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Generate a human-readable summary of the architecture.
+   */
+  function _generateSummary(components, connections) {
+    const byCategory = {};
+    for (const c of components) {
+      byCategory[c.category] = (byCategory[c.category] || 0) + 1;
+    }
+    const azureCount = components.filter(c => c.provider === 'azure').length;
+    const parts = [];
+    parts.push(`${components.length} component(s), ${connections.length} connection(s)`);
+    if (azureCount > 0) parts.push(`${azureCount} Azure service(s)`);
+    const cats = Object.entries(byCategory).map(([k, v]) => `${v} ${k}`).join(', ');
+    if (cats) parts.push(`Categories: ${cats}`);
+    return parts.join('. ') + '.';
+  }
+
+  return { toPNG, toJSON, fromJSON, autoSave, autoLoad, toArchitecture };
 })();
