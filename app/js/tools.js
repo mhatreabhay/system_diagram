@@ -29,9 +29,15 @@ const Tools = (() => {
   let fillColor = '#ffffff';
   let fillEnabled = false;
   let strokeWidth = 0.5;
+  let strokeEnabled = true;
   let edgeStyle = 'sharp';      // 'sharp' | 'round'
   let strokeDash = 'solid';     // 'solid' | 'dashed' | 'dotted' | 'dashdot'
   let shapeFillStyle = 'none';  // 'none' | 'solid' | 'hachure' | 'cross-hatch' | 'zigzag'
+
+  // Text style state
+  let fontSize = 16;            // px
+  let textHAlign = 'center';    // 'left' | 'center' | 'right'
+  let wordWrap = false;
 
   // Pending label for system shapes (set before draw, applied after)
   let pendingShapeLabel = null;
@@ -77,19 +83,38 @@ const Tools = (() => {
       case 'fillColor': fillColor = value; break;
       case 'fillEnabled': fillEnabled = !!value; break;
       case 'strokeWidth': strokeWidth = parseFloat(value); break;
+      case 'strokeEnabled': strokeEnabled = !!value; break;
       case 'edgeStyle': edgeStyle = value; break;
       case 'strokeDash': strokeDash = value; break;
       case 'shapeFillStyle': shapeFillStyle = value; fillEnabled = value !== 'none'; break;
+      case 'fontSize': fontSize = parseInt(value, 10) || 16; break;
+      case 'textHAlign': textHAlign = value; break;
+      case 'wordWrap': wordWrap = !!value; break;
     }
     // Apply to selected shapes
     for (const id of selectedIds) {
       const s = shapes.find(s => s.id === id);
       if (s) {
+        // Border toggle applies only to non-connector, non-text shapes
+        if (prop === 'strokeEnabled') {
+          if (s.type !== 'line' && s.type !== 'arrow' && s.type !== 'freehand' && s.type !== 'text') {
+            s.strokeEnabled = !!value;
+          }
+        }
         if (prop === 'strokeColor') s.strokeColor = value;
         if (prop === 'fillColor') s.fillColor = value;
         if (prop === 'strokeWidth') s.strokeWidth = parseFloat(value);
         if (prop === 'edgeStyle') s.edgeStyle = value;
         if (prop === 'strokeDash') s.strokeDash = value;
+        if (prop === 'fontSize') {
+          if (Shapes.CONTAINER_TYPES.has(s.type) || s.type === 'text') s.fontSize = parseInt(value, 10) || 16;
+        }
+        if (prop === 'textHAlign') {
+          if (Shapes.CONTAINER_TYPES.has(s.type) || s.type === 'text') s.textHAlign = value;
+        }
+        if (prop === 'wordWrap') {
+          if (Shapes.CONTAINER_TYPES.has(s.type) || s.type === 'text') s.wordWrap = !!value;
+        }
         if (prop === 'shapeFillStyle') {
           s.shapeFillStyle = value;
           s.fillColor = value !== 'none' ? fillColor : 'transparent';
@@ -212,7 +237,14 @@ const Tools = (() => {
       case 'openai': case 'cogservices': case 'azureml':
       case 'botservice': case 'aisearch': case 'aistudio':
       case 'iothub': case 'iotcentral': case 'digitaltwins': case 'iotedge':
-      case 'databricks': case 'hdinsight': case 'dataexplorer': case 'powerbi': {
+      case 'databricks': case 'hdinsight': case 'dataexplorer': case 'powerbi':
+      // Kubernetes
+      case 'k8spod': case 'k8sdeploy': case 'k8ssvc': case 'k8sing':
+      case 'k8sns': case 'k8scrd': case 'k8scm': case 'k8ssecret':
+      case 'k8spv': case 'k8spvc': case 'k8ssc': case 'k8ssts':
+      case 'k8sds': case 'k8srs': case 'k8sjob': case 'k8scronjob':
+      case 'k8shpa': case 'k8ssa': case 'k8srole': case 'k8snetpol':
+      case 'k8sep': case 'k8svol': case 'k8slimits': case 'k8squota': {
         // Firewall gets default red color scheme
         let shapeStroke = strokeColor;
         let shapeFill = fillEnabled ? fillColor : 'transparent';
@@ -227,8 +259,12 @@ const Tools = (() => {
           width: 0, height: 0,
           strokeColor: shapeStroke,
           fillColor: shapeFill,
+          strokeEnabled,
           strokeWidth, edgeStyle, strokeDash,
           shapeFillStyle: shapeFillSt,
+          fontSize,
+          textHAlign,
+          wordWrap,
         });
       }
         isDragging = true;
@@ -482,7 +518,14 @@ const Tools = (() => {
       case 'openai': case 'cogservices': case 'azureml':
       case 'botservice': case 'aisearch': case 'aistudio':
       case 'iothub': case 'iotcentral': case 'digitaltwins': case 'iotedge':
-      case 'databricks': case 'hdinsight': case 'dataexplorer': case 'powerbi': {
+      case 'databricks': case 'hdinsight': case 'dataexplorer': case 'powerbi':
+      // Kubernetes
+      case 'k8spod': case 'k8sdeploy': case 'k8ssvc': case 'k8sing':
+      case 'k8sns': case 'k8scrd': case 'k8scm': case 'k8ssecret':
+      case 'k8spv': case 'k8spvc': case 'k8ssc': case 'k8ssts':
+      case 'k8sds': case 'k8srs': case 'k8sjob': case 'k8scronjob':
+      case 'k8shpa': case 'k8ssa': case 'k8srole': case 'k8snetpol':
+      case 'k8sep': case 'k8svol': case 'k8slimits': case 'k8squota': {
         const bounds = Utils.normalizeBounds(
           dragStartWorld.x, dragStartWorld.y, world.x, world.y
         );
@@ -757,7 +800,9 @@ const Tools = (() => {
       y: world.y,
       text: '',
       strokeColor,
-      fontSize: 16,
+      fontSize,
+      textHAlign,
+      wordWrap,
     });
     _editingInShapeRef = null; // standalone text, not in-shape
 
@@ -825,7 +870,7 @@ const Tools = (() => {
     input.style.width = (b.w * scale) + 'px';
     input.style.height = (b.h * scale) + 'px';
     input.style.fontSize = ((shape.fontSize || 16) * scale) + 'px';
-    input.style.textAlign = 'center';
+    input.style.textAlign = (shape.textHAlign || 'center');
     input.value = shape.text || '';
 
     _textEditOpenedAt = Date.now();

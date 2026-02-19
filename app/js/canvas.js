@@ -73,6 +73,31 @@ const AzureIcons = (() => {
     hdinsight:      'icons/azure-analytics/hdinsight.svg',
     dataexplorer:   'icons/azure-analytics/data-explorer.svg',
     powerbi:        'icons/azure-analytics/power-bi.svg',
+    // Kubernetes resources
+    k8spod:         'icons/kubernetes/pod.png',
+    k8sdeploy:      'icons/kubernetes/deploy.png',
+    k8ssvc:         'icons/kubernetes/svc.png',
+    k8sing:         'icons/kubernetes/ing.png',
+    k8sns:          'icons/kubernetes/ns.png',
+    k8scrd:         'icons/kubernetes/crd.png',
+    k8scm:          'icons/kubernetes/cm.png',
+    k8ssecret:      'icons/kubernetes/secret.png',
+    k8spv:          'icons/kubernetes/pv.png',
+    k8spvc:         'icons/kubernetes/pvc.png',
+    k8ssc:          'icons/kubernetes/sc.png',
+    k8ssts:         'icons/kubernetes/sts.png',
+    k8sds:          'icons/kubernetes/ds.png',
+    k8srs:          'icons/kubernetes/rs.png',
+    k8sjob:         'icons/kubernetes/job.png',
+    k8scronjob:     'icons/kubernetes/cronjob.png',
+    k8shpa:         'icons/kubernetes/hpa.png',
+    k8ssa:          'icons/kubernetes/sa.png',
+    k8srole:        'icons/kubernetes/role.png',
+    k8snetpol:      'icons/kubernetes/netpol.png',
+    k8sep:          'icons/kubernetes/ep.png',
+    k8svol:         'icons/kubernetes/vol.png',
+    k8slimits:      'icons/kubernetes/limits.png',
+    k8squota:       'icons/kubernetes/quota.png',
   };
   // Preload all icons as Image objects
   for (const [key, src] of Object.entries(_icons)) {
@@ -236,14 +261,28 @@ const CanvasView = (() => {
       }
     }
 
+    // If border is disabled, turn off Rough.js stroke for all non-connector shapes.
+    // (Connectors/text have their own styling semantics.)
+    const borderToggleApplies = shape.type !== 'line' && shape.type !== 'arrow' && shape.type !== 'freehand' && shape.type !== 'text';
+    if (borderToggleApplies && shape.strokeEnabled === false) {
+      opts.stroke = 'transparent';
+      opts.strokeWidth = 0;
+      delete opts.strokeLineDash;
+    }
+
+    // Border toggle (no border)
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
+
     ctx.globalAlpha = shape.opacity || 1;
 
     switch (shape.type) {
       case 'rectangle':
         if (shape.edgeStyle === 'round') {
-          _drawRoundedRect(shape.x, shape.y, shape.width, shape.height, Math.min(12, Math.min(shape.width, shape.height) * 0.2), opts);
+          _drawRoundedRect(shape.x, shape.y, shape.width, shape.height, Math.min(12, Math.min(shape.width, shape.height) * 0.2), borderOpts);
         } else {
-          rc.rectangle(shape.x, shape.y, shape.width, shape.height, opts);
+          rc.rectangle(shape.x, shape.y, shape.width, shape.height, borderOpts);
         }
         _drawShapeText(shape);
         break;
@@ -251,7 +290,7 @@ const CanvasView = (() => {
       case 'ellipse': {
         const cx = shape.x + shape.width / 2;
         const cy = shape.y + shape.height / 2;
-        rc.ellipse(cx, cy, shape.width, shape.height, opts);
+        rc.ellipse(cx, cy, shape.width, shape.height, borderOpts);
         _drawShapeText(shape);
         break;
       }
@@ -266,7 +305,7 @@ const CanvasView = (() => {
           [cx + hw, cy],
           [cx, cy + hh],
           [cx - hw, cy],
-        ], opts);
+        ], borderOpts);
         _drawShapeText(shape);
         break;
       }
@@ -305,13 +344,27 @@ const CanvasView = (() => {
 
       case 'text': {
         ctx.save();
-        ctx.font = `${shape.fontSize || 16}px ${shape.fontFamily || 'Segoe UI, system-ui, sans-serif'}`;
+        const fs = shape.fontSize || 16;
+        ctx.font = `${fs}px ${shape.fontFamily || 'Segoe UI, system-ui, sans-serif'}`;
         ctx.fillStyle = shape.strokeColor;
         ctx.textBaseline = 'top';
-        const lines = (shape.text || '').split('\n');
-        const lineHeight = (shape.fontSize || 16) * 1.4;
+
+        const hAlign = shape.textHAlign || 'left';
+        ctx.textAlign = (hAlign === 'right' || hAlign === 'center' || hAlign === 'left') ? hAlign : 'left';
+
+        const pad = 4;
+        const maxW = (shape.wordWrap && shape.width && shape.width > pad * 2) ? (shape.width - pad * 2) : null;
+        const lines = (maxW ? _wrapTextLines(ctx, (shape.text || ''), maxW) : (shape.text || '').split('\n'));
+        const lineHeight = fs * 1.4;
+
+        const anchorW = (shape.width || 0);
+        let x = shape.x;
+        if (hAlign === 'center' && anchorW) x = shape.x + anchorW / 2;
+        if (hAlign === 'right' && anchorW) x = shape.x + anchorW - pad;
+        if (hAlign === 'left' && anchorW) x = shape.x + pad;
+
         for (let i = 0; i < lines.length; i++) {
-          ctx.fillText(lines[i], shape.x, shape.y + i * lineHeight);
+          ctx.fillText(lines[i], x, shape.y + i * lineHeight);
         }
         ctx.restore();
         break;
@@ -542,6 +595,32 @@ const CanvasView = (() => {
       case 'hdinsight':    _drawHdInsight(shape, opts); break;
       case 'dataexplorer': _drawDataExplorer(shape, opts); break;
       case 'powerbi':      _drawPowerBi(shape, opts); break;
+
+      // Kubernetes shapes
+      case 'k8spod':       _drawK8s(shape, opts, 'k8spod'); break;
+      case 'k8sdeploy':    _drawK8s(shape, opts, 'k8sdeploy'); break;
+      case 'k8ssvc':       _drawK8s(shape, opts, 'k8ssvc'); break;
+      case 'k8sing':       _drawK8s(shape, opts, 'k8sing'); break;
+      case 'k8sns':        _drawK8s(shape, opts, 'k8sns'); break;
+      case 'k8scrd':       _drawK8s(shape, opts, 'k8scrd'); break;
+      case 'k8scm':        _drawK8s(shape, opts, 'k8scm'); break;
+      case 'k8ssecret':    _drawK8s(shape, opts, 'k8ssecret'); break;
+      case 'k8spv':        _drawK8s(shape, opts, 'k8spv'); break;
+      case 'k8spvc':       _drawK8s(shape, opts, 'k8spvc'); break;
+      case 'k8ssc':        _drawK8s(shape, opts, 'k8ssc'); break;
+      case 'k8ssts':       _drawK8s(shape, opts, 'k8ssts'); break;
+      case 'k8sds':        _drawK8s(shape, opts, 'k8sds'); break;
+      case 'k8srs':        _drawK8s(shape, opts, 'k8srs'); break;
+      case 'k8sjob':       _drawK8s(shape, opts, 'k8sjob'); break;
+      case 'k8scronjob':   _drawK8s(shape, opts, 'k8scronjob'); break;
+      case 'k8shpa':       _drawK8s(shape, opts, 'k8shpa'); break;
+      case 'k8ssa':        _drawK8s(shape, opts, 'k8ssa'); break;
+      case 'k8srole':      _drawK8s(shape, opts, 'k8srole'); break;
+      case 'k8snetpol':    _drawK8s(shape, opts, 'k8snetpol'); break;
+      case 'k8sep':        _drawK8s(shape, opts, 'k8sep'); break;
+      case 'k8svol':       _drawK8s(shape, opts, 'k8svol'); break;
+      case 'k8slimits':    _drawK8s(shape, opts, 'k8slimits'); break;
+      case 'k8squota':     _drawK8s(shape, opts, 'k8squota'); break;
     }
 
     ctx.globalAlpha = 1;
@@ -551,6 +630,9 @@ const CanvasView = (() => {
 
   /** Database — cylinder */
   function _drawDatabase(shape, opts) {
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
     const { x, y, width: w, height: h } = shape;
     const ry = Math.min(h * 0.15, 20); // ellipse cap height
 
@@ -568,11 +650,11 @@ const CanvasView = (() => {
     }
 
     // Top ellipse
-    rc.ellipse(x + w / 2, y + ry, w, ry * 2, { ...opts, fill: opts.fill, fillStyle: opts.fill ? 'hachure' : undefined });
+    rc.ellipse(x + w / 2, y + ry, w, ry * 2, { ...borderOpts, fill: borderOpts.fill, fillStyle: borderOpts.fill ? 'hachure' : undefined });
     // Left side
-    rc.line(x, y + ry, x, y + h - ry, opts);
+    rc.line(x, y + ry, x, y + h - ry, borderOpts);
     // Right side
-    rc.line(x + w, y + ry, x + w, y + h - ry, opts);
+    rc.line(x + w, y + ry, x + w, y + h - ry, borderOpts);
     // Bottom arc (half-ellipse)
     const steps = 30;
     for (let i = 0; i < steps; i++) {
@@ -581,7 +663,7 @@ const CanvasView = (() => {
       rc.line(
         x + w / 2 + (w / 2) * Math.cos(a1), y + h - ry + ry * Math.sin(a1),
         x + w / 2 + (w / 2) * Math.cos(a2), y + h - ry + ry * Math.sin(a2),
-        opts
+        borderOpts
       );
     }
     _drawShapeText(shape);
@@ -589,12 +671,15 @@ const CanvasView = (() => {
 
   /** Queue — rectangle with horizontal dividers and right arrow */
   function _drawQueue(shape, opts) {
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
     const { x, y, width: w, height: h } = shape;
     const r = Math.min(12, Math.min(w, h) * 0.2);
     if (shape.edgeStyle === 'round') {
-      _drawRoundedRect(x, y, w, h, r, opts);
+      _drawRoundedRect(x, y, w, h, r, borderOpts);
     } else {
-      rc.rectangle(x, y, w, h, opts);
+      rc.rectangle(x, y, w, h, borderOpts);
     }
     // Horizontal dividers
     const slots = 3;
@@ -614,12 +699,15 @@ const CanvasView = (() => {
 
   /** Cache — rounded rectangle with lightning bolt */
   function _drawCache(shape, opts) {
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
     const { x, y, width: w, height: h } = shape;
     const r = Math.min(12, Math.min(w, h) * 0.2);
     if (shape.edgeStyle === 'round') {
-      _drawRoundedRect(x, y, w, h, r, opts);
+      _drawRoundedRect(x, y, w, h, r, borderOpts);
     } else {
-      rc.rectangle(x, y, w, h, opts);
+      rc.rectangle(x, y, w, h, borderOpts);
     }
     // Lightning bolt icon (top-right area)
     const ix = x + w - 18;
@@ -642,12 +730,15 @@ const CanvasView = (() => {
 
   /** Server — rectangle with horizontal slot lines */
   function _drawServer(shape, opts) {
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
     const { x, y, width: w, height: h } = shape;
     const r = Math.min(12, Math.min(w, h) * 0.2);
     if (shape.edgeStyle === 'round') {
-      _drawRoundedRect(x, y, w, h, r, opts);
+      _drawRoundedRect(x, y, w, h, r, borderOpts);
     } else {
-      rc.rectangle(x, y, w, h, opts);
+      rc.rectangle(x, y, w, h, borderOpts);
     }
     // Rack lines
     const lines = Math.min(3, Math.floor(h / 20));
@@ -668,6 +759,9 @@ const CanvasView = (() => {
 
   /** Cloud — cloud shape using bezier curves */
   function _drawCloud(shape, opts) {
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
     const { x, y, width: w, height: h } = shape;
     // Classic cloud silhouette using cubic bezier curves
     // Flat bottom, 3 distinct puffs on top, small bumps on sides
@@ -687,18 +781,21 @@ const CanvasView = (() => {
       // Flat bottom
       `Z`
     ].join(' ');
-    rc.path(path, opts);
+    rc.path(path, borderOpts);
     _drawShapeText(shape);
   }
 
   /** Firewall — rectangle with brick-wall pattern */
   function _drawFirewall(shape, opts) {
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
     const { x, y, width: w, height: h } = shape;
     const r = Math.min(12, Math.min(w, h) * 0.2);
     if (shape.edgeStyle === 'round') {
-      _drawRoundedRect(x, y, w, h, r, opts);
+      _drawRoundedRect(x, y, w, h, r, borderOpts);
     } else {
-      rc.rectangle(x, y, w, h, opts);
+      rc.rectangle(x, y, w, h, borderOpts);
     }
     // Brick pattern — red bricks
     ctx.save();
@@ -736,12 +833,15 @@ const CanvasView = (() => {
 
   /** Helper: draw a base rect (rounded or sharp) */
   function _baseRect(shape, opts) {
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
     const { x, y, width: w, height: h } = shape;
     const r = Math.min(12, Math.min(w, h) * 0.2);
     if (shape.edgeStyle === 'round') {
-      _drawRoundedRect(x, y, w, h, r, opts);
+      _drawRoundedRect(x, y, w, h, r, borderOpts);
     } else {
-      rc.rectangle(x, y, w, h, opts);
+      rc.rectangle(x, y, w, h, borderOpts);
     }
   }
 
@@ -1307,6 +1407,9 @@ const CanvasView = (() => {
   function _drawDataExplorer(s,o){_baseRect(s,o);_drawAzureIcon(s,'dataexplorer');_drawShapeText(s);}
   function _drawPowerBi(s,o){_baseRect(s,o);_drawAzureIcon(s,'powerbi');_drawShapeText(s);}
 
+  // === Kubernetes shape renderer (generic — all use same pattern) ===
+  function _drawK8s(s, o, typeKey) { _baseRect(s, o); _drawAzureIcon(s, typeKey); _drawShapeText(s); }
+
   // ---------- END NEW SYSTEM SHAPE RENDERERS ----------
 
   /**
@@ -1331,20 +1434,51 @@ const CanvasView = (() => {
   /**
    * Draw text inside a container shape (rectangle, ellipse, diamond)
    */
+  function _wrapTextLines(ctx, text, maxWidth) {
+    // Preserve explicit newlines by wrapping each paragraph independently.
+    const paragraphs = (text || '').split('\n');
+    const out = [];
+    for (const para of paragraphs) {
+      if (para.trim() === '') {
+        out.push('');
+        continue;
+      }
+      const words = para.split(/\s+/).filter(Boolean);
+      let line = '';
+      for (const w of words) {
+        const test = line ? (line + ' ' + w) : w;
+        if (!line || ctx.measureText(test).width <= maxWidth) {
+          line = test;
+        } else {
+          out.push(line);
+          line = w;
+        }
+      }
+      if (line) out.push(line);
+    }
+    return out;
+  }
+
   function _drawShapeText(shape) {
     if (!shape.text) return;
     ctx.save();
     const fs = shape.fontSize || 16;
     ctx.font = `${fs}px ${shape.fontFamily || 'Segoe UI, system-ui, sans-serif'}`;
     ctx.fillStyle = shape.strokeColor;
-    ctx.textAlign = 'center';
+    const hAlign = shape.textHAlign || 'center';
+    ctx.textAlign = (hAlign === 'right' || hAlign === 'center' || hAlign === 'left') ? hAlign : 'center';
     ctx.textBaseline = 'top';
 
-    const lines = shape.text.split('\n');
+    const pad = 6;
+    const maxW = (shape.wordWrap && shape.width && shape.width > pad * 2) ? (shape.width - pad * 2) : null;
+    const lines = (maxW ? _wrapTextLines(ctx, shape.text, maxW) : shape.text.split('\n'));
     const lineHeight = fs * 1.4;
     const totalTextH = lines.length * lineHeight;
-    const cx = shape.x + shape.width / 2;
-    const pad = 6;
+
+    let x;
+    if (hAlign === 'left') x = shape.x + pad;
+    else if (hAlign === 'right') x = shape.x + shape.width - pad;
+    else x = shape.x + shape.width / 2;
 
     let startY;
     const vAlign = shape.textVAlign || 'bottom';
@@ -1360,7 +1494,7 @@ const CanvasView = (() => {
     }
 
     for (let i = 0; i < lines.length; i++) {
-      ctx.fillText(lines[i], cx, startY + i * lineHeight);
+      ctx.fillText(lines[i], x, startY + i * lineHeight);
     }
     ctx.restore();
   }

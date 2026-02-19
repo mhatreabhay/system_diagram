@@ -11,9 +11,12 @@
   const strokeColorInput = document.getElementById('strokeColor');
   const fillColorInput = document.getElementById('fillColor');
   const strokeWidthSelect = document.getElementById('strokeWidth');
+  const strokeEnabledCheckbox = document.getElementById('strokeEnabled');
   const edgeStyleSelect = document.getElementById('edgeStyleSelect');
   const strokeDashSelect = document.getElementById('strokeDashSelect');
   const fillStyleSelect = document.getElementById('fillStyleSelect');
+  const fontSizeSelect = document.getElementById('fontSizeSelect');
+  const wordWrapCheckbox = document.getElementById('wordWrap');
   const strokeSwatch = document.getElementById('strokeSwatch');
   const fillSwatch = document.getElementById('fillSwatch');
   const undoBtn = document.getElementById('undoBtn');
@@ -107,8 +110,71 @@
     });
   });
 
+  // Horizontal text alignment (left/center/right)
+  const hAlignBtns = document.querySelectorAll('.panel-icon-btn.halign-btn');
+  hAlignBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const align = btn.dataset.halign;
+      Tools.setStyle('textHAlign', align);
+      hAlignBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
   // === Left Shape Ribbon ===
   const ribbonItems = document.querySelectorAll('.ribbon-item');
+
+  function positionRibbonFlyout(categoryEl) {
+    const flyout = categoryEl.querySelector('.ribbon-flyout');
+    const icon = categoryEl.querySelector('.ribbon-icon');
+    if (!flyout || !icon) return;
+
+    const margin = 8;
+    const viewportH = window.innerHeight;
+    const maxH = Math.max(140, viewportH - margin * 2);
+
+    // Reset before measuring
+    flyout.style.top = '0px';
+    flyout.style.maxHeight = `${maxH}px`;
+    flyout.style.overflowY = 'auto';
+    flyout.style.overflowX = 'hidden';
+
+    // Ensure it's measurable even if CSS hasn't flipped it visible yet
+    const prevDisplay = flyout.style.display;
+    const computedDisplay = window.getComputedStyle(flyout).display;
+    if (computedDisplay === 'none') {
+      flyout.style.visibility = 'hidden';
+      flyout.style.display = 'block';
+    }
+
+    const iconRect = icon.getBoundingClientRect();
+    const flyoutRect = flyout.getBoundingClientRect();
+    const flyoutH = flyoutRect.height;
+
+    // Flyout is positioned relative to the category's top which aligns with the icon.
+    // Clamp so the flyout stays within [margin, viewportH - margin].
+    const minOffset = margin - iconRect.top;
+    const desiredOffset = viewportH - margin - flyoutH - iconRect.top;
+    const topOffset = Math.min(0, Math.max(minOffset, desiredOffset));
+    flyout.style.top = `${topOffset}px`;
+
+    if (computedDisplay === 'none') {
+      flyout.style.display = prevDisplay;
+      flyout.style.visibility = '';
+    }
+  }
+
+  // Keep long flyouts (like Kubernetes) on-screen.
+  document.querySelectorAll('.ribbon-category').forEach(cat => {
+    cat.addEventListener('mouseenter', () => {
+      requestAnimationFrame(() => positionRibbonFlyout(cat));
+    });
+  });
+
+  window.addEventListener('resize', () => {
+    const hovered = document.querySelector('.ribbon-category:hover');
+    if (hovered) positionRibbonFlyout(hovered);
+  });
 
   ribbonItems.forEach(item => {
     item.addEventListener('click', () => {
@@ -153,12 +219,29 @@
     Tools.setStyle('strokeWidth', e.target.value);
   });
 
+  strokeEnabledCheckbox.addEventListener('change', (e) => {
+    // Checkbox is labeled "No border".
+    // checked => no border => strokeEnabled=false
+    const noBorder = !!e.target.checked;
+    strokeWidthSelect.disabled = noBorder;
+    strokeDashSelect.disabled = noBorder;
+    Tools.setStyle('strokeEnabled', !noBorder);
+  });
+
   edgeStyleSelect.addEventListener('change', (e) => {
     Tools.setStyle('edgeStyle', e.target.value);
   });
 
   strokeDashSelect.addEventListener('change', (e) => {
     Tools.setStyle('strokeDash', e.target.value);
+  });
+
+  fontSizeSelect.addEventListener('change', (e) => {
+    Tools.setStyle('fontSize', e.target.value);
+  });
+
+  wordWrapCheckbox.addEventListener('change', (e) => {
+    Tools.setStyle('wordWrap', !!e.target.checked);
   });
 
   fillStyleSelect.addEventListener('change', (e) => {

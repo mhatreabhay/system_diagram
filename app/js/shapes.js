@@ -38,6 +38,11 @@ const Shapes = (() => {
     'iothub', 'iotcentral', 'digitaltwins', 'iotedge',
     // Azure Analytics
     'databricks', 'hdinsight', 'dataexplorer', 'powerbi',
+    // Kubernetes (CRD / K8s resources)
+    'k8spod', 'k8sdeploy', 'k8ssvc', 'k8sing', 'k8sns', 'k8scrd',
+    'k8scm', 'k8ssecret', 'k8spv', 'k8spvc', 'k8ssc', 'k8ssts',
+    'k8sds', 'k8srs', 'k8sjob', 'k8scronjob', 'k8shpa', 'k8ssa',
+    'k8srole', 'k8snetpol', 'k8sep', 'k8svol', 'k8slimits', 'k8squota',
   ]);
 
   /**
@@ -51,6 +56,7 @@ const Shapes = (() => {
       y: 0,
       width: 0,
       height: 0,
+      strokeEnabled: true,
       strokeColor: '#1e1e1e',
       fillColor: 'transparent',
       strokeWidth: 2,
@@ -63,6 +69,8 @@ const Shapes = (() => {
       fontSize: 16,
       fontFamily: 'Segoe UI, system-ui, sans-serif',
       textVAlign: 'bottom', // 'top' | 'middle' | 'bottom'
+      textHAlign: 'center', // 'left' | 'center' | 'right'
+      wordWrap: false,
       // For arrow
       arrowHead: type === 'arrow',
       // Edge style: 'sharp' or 'round'

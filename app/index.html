@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SystemDraw — System Design Diagrams</title>
-  <link rel="stylesheet" href="css/styles.css?v=6">
+  <link rel="stylesheet" href="css/styles.css?v=8">
   <!-- Rough.js for hand-drawn aesthetic -->
   <script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.min.js"></script>
 </head>
@@ -306,6 +306,43 @@
           <button class="ribbon-item" data-systool="powerbi" data-label="Power BI">📊 Power BI</button>
         </div>
       </div>
+      <div class="ribbon-category" data-category="kubernetes">
+        <div class="ribbon-icon" title="Kubernetes">☸</div>
+        <div class="ribbon-flyout">
+          <div class="flyout-title">Kubernetes</div>
+          <div class="flyout-subtitle">Workloads</div>
+          <button class="ribbon-item" data-systool="k8spod" data-label="Pod">☸ Pod</button>
+          <button class="ribbon-item" data-systool="k8sdeploy" data-label="Deployment">🚀 Deployment</button>
+          <button class="ribbon-item" data-systool="k8ssts" data-label="StatefulSet">📦 StatefulSet</button>
+          <button class="ribbon-item" data-systool="k8sds" data-label="DaemonSet">👹 DaemonSet</button>
+          <button class="ribbon-item" data-systool="k8srs" data-label="ReplicaSet">🔁 ReplicaSet</button>
+          <button class="ribbon-item" data-systool="k8sjob" data-label="Job">⚡ Job</button>
+          <button class="ribbon-item" data-systool="k8scronjob" data-label="CronJob">⏰ CronJob</button>
+          <button class="ribbon-item" data-systool="k8shpa" data-label="HPA">📈 HPA</button>
+          <hr class="flyout-divider">
+          <div class="flyout-subtitle">Networking</div>
+          <button class="ribbon-item" data-systool="k8ssvc" data-label="Service">🌐 Service</button>
+          <button class="ribbon-item" data-systool="k8sing" data-label="Ingress">🚪 Ingress</button>
+          <button class="ribbon-item" data-systool="k8snetpol" data-label="NetworkPolicy">🛡 NetworkPolicy</button>
+          <button class="ribbon-item" data-systool="k8sep" data-label="Endpoint">📍 Endpoint</button>
+          <hr class="flyout-divider">
+          <div class="flyout-subtitle">Config &amp; Storage</div>
+          <button class="ribbon-item" data-systool="k8scm" data-label="ConfigMap">📋 ConfigMap</button>
+          <button class="ribbon-item" data-systool="k8ssecret" data-label="Secret">🔐 Secret</button>
+          <button class="ribbon-item" data-systool="k8spv" data-label="PersistentVolume">💾 PersistentVolume</button>
+          <button class="ribbon-item" data-systool="k8spvc" data-label="PVC">📎 PVC</button>
+          <button class="ribbon-item" data-systool="k8ssc" data-label="StorageClass">🗄 StorageClass</button>
+          <button class="ribbon-item" data-systool="k8svol" data-label="Volume">📁 Volume</button>
+          <hr class="flyout-divider">
+          <div class="flyout-subtitle">Cluster</div>
+          <button class="ribbon-item" data-systool="k8sns" data-label="Namespace">📂 Namespace</button>
+          <button class="ribbon-item" data-systool="k8scrd" data-label="CRD">🧩 CRD</button>
+          <button class="ribbon-item" data-systool="k8ssa" data-label="ServiceAccount">👤 ServiceAccount</button>
+          <button class="ribbon-item" data-systool="k8srole" data-label="Role">🔑 Role</button>
+          <button class="ribbon-item" data-systool="k8slimits" data-label="LimitRange">📏 LimitRange</button>
+          <button class="ribbon-item" data-systool="k8squota" data-label="ResourceQuota">📊 ResourceQuota</button>
+        </div>
+      </div>
     </div>
 
     <!-- Canvas -->
@@ -350,6 +387,10 @@
             </select>
           </div>
           <div class="panel-field">
+            <span class="field-label">No border</span>
+            <input type="checkbox" id="strokeEnabled" class="panel-checkbox">
+          </div>
+          <div class="panel-field">
             <span class="field-label">Style</span>
             <select id="strokeDashSelect" class="panel-select">
               <option value="solid">── Solid</option>
@@ -385,6 +426,41 @@
         <!-- Text Section -->
         <div class="panel-section">
           <div class="panel-label">Text Align</div>
+          <div class="panel-field">
+            <span class="field-label">Size</span>
+            <select id="fontSizeSelect" class="panel-select">
+              <option value="12">Small</option>
+              <option value="16" selected>Medium</option>
+              <option value="20">Large</option>
+            </select>
+          </div>
+          <div class="panel-row align-row">
+            <button class="panel-icon-btn halign-btn" data-halign="left" title="Align Left">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="4" y1="6" x2="16" y2="6"/>
+                <line x1="4" y1="12" x2="20" y2="12"/>
+                <line x1="4" y1="18" x2="14" y2="18"/>
+              </svg>
+            </button>
+            <button class="panel-icon-btn halign-btn active" data-halign="center" title="Align Center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="6" y1="6" x2="18" y2="6"/>
+                <line x1="4" y1="12" x2="20" y2="12"/>
+                <line x1="7" y1="18" x2="17" y2="18"/>
+              </svg>
+            </button>
+            <button class="panel-icon-btn halign-btn" data-halign="right" title="Align Right">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="6" x2="20" y2="6"/>
+                <line x1="4" y1="12" x2="20" y2="12"/>
+                <line x1="10" y1="18" x2="20" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="panel-field">
+            <span class="field-label">Word wrap</span>
+            <input type="checkbox" id="wordWrap" class="panel-checkbox">
+          </div>
           <div class="panel-row align-row">
             <button class="panel-icon-btn align-btn" data-valign="top" title="Align Top">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -430,13 +506,13 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/utils.js?v=6"></script>
-  <script src="js/shapes.js?v=6"></script>
-  <script src="js/history.js?v=6"></script>
-  <script src="js/canvas.js?v=6"></script>
-  <script src="js/connectors.js?v=6"></script>
-  <script src="js/tools.js?v=6"></script>
-  <script src="js/export.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/utils.js?v=8"></script>
+  <script src="js/shapes.js?v=8"></script>
+  <script src="js/history.js?v=8"></script>
+  <script src="js/canvas.js?v=8"></script>
+  <script src="js/connectors.js?v=8"></script>
+  <script src="js/tools.js?v=8"></script>
+  <script src="js/export.js?v=8"></script>
+  <script src="js/app.js?v=8"></script>
 </body>
 </html>

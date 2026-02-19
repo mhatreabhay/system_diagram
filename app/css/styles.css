@@ -203,6 +203,10 @@ html, body {
   box-shadow: 0 0 0 2px rgba(108, 71, 255, 0.15);
 }
 
+.panel-checkbox {
+  transform: scale(1.05);
+}
+
 .panel-icon-btn {
   width: 32px;
   height: 32px;
@@ -462,6 +466,9 @@ html, body {
   padding: 4px 0;
   z-index: 500;
   white-space: nowrap;
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .ribbon-category:hover .ribbon-flyout {

@@ -81,14 +81,27 @@ const Export = (() => {
       }
     }
 
+    // If border is disabled, turn off Rough.js stroke for all non-connector shapes.
+    const borderToggleApplies = shape.type !== 'line' && shape.type !== 'arrow' && shape.type !== 'freehand' && shape.type !== 'text';
+    if (borderToggleApplies && shape.strokeEnabled === false) {
+      opts.stroke = 'transparent';
+      opts.strokeWidth = 0;
+      delete opts.strokeLineDash;
+    }
+
+    // Border toggle (no border)
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
+
     ctx.globalAlpha = shape.opacity || 1;
 
     switch (shape.type) {
       case 'rectangle':
         if (shape.edgeStyle === 'round') {
-          _exportRoundedRect(rc, shape.x, shape.y, shape.width, shape.height, Math.min(12, Math.min(shape.width, shape.height) * 0.2), opts);
+          _exportRoundedRect(rc, shape.x, shape.y, shape.width, shape.height, Math.min(12, Math.min(shape.width, shape.height) * 0.2), borderOpts);
         } else {
-          rc.rectangle(shape.x, shape.y, shape.width, shape.height, opts);
+          rc.rectangle(shape.x, shape.y, shape.width, shape.height, borderOpts);
         }
         _exportShapeText(ctx, shape);
         break;
@@ -96,7 +109,7 @@ const Export = (() => {
       case 'ellipse': {
         const cx = shape.x + shape.width / 2;
         const cy = shape.y + shape.height / 2;
-        rc.ellipse(cx, cy, shape.width, shape.height, opts);
+        rc.ellipse(cx, cy, shape.width, shape.height, borderOpts);
         _exportShapeText(ctx, shape);
         break;
       }
@@ -109,7 +122,7 @@ const Export = (() => {
         rc.polygon([
           [cx, cy - hh], [cx + hw, cy],
           [cx, cy + hh], [cx - hw, cy],
-        ], opts);
+        ], borderOpts);
         _exportShapeText(ctx, shape);
         break;
       }
@@ -141,13 +154,27 @@ const Export = (() => {
 
       case 'text':
         ctx.save();
-        ctx.font = `${shape.fontSize || 16}px ${shape.fontFamily || 'Segoe UI, system-ui, sans-serif'}`;
+        const fs = shape.fontSize || 16;
+        ctx.font = `${fs}px ${shape.fontFamily || 'Segoe UI, system-ui, sans-serif'}`;
         ctx.fillStyle = shape.strokeColor;
         ctx.textBaseline = 'top';
-        const lines = (shape.text || '').split('\n');
-        const lineHeight = (shape.fontSize || 16) * 1.4;
+
+        const hAlign = shape.textHAlign || 'left';
+        ctx.textAlign = (hAlign === 'right' || hAlign === 'center' || hAlign === 'left') ? hAlign : 'left';
+
+        const pad = 4;
+        const maxW = (shape.wordWrap && shape.width && shape.width > pad * 2) ? (shape.width - pad * 2) : null;
+        const lines = (maxW ? _exportWrapTextLines(ctx, (shape.text || ''), maxW) : (shape.text || '').split('\n'));
+        const lineHeight = fs * 1.4;
+
+        const anchorW = (shape.width || 0);
+        let x = shape.x;
+        if (hAlign === 'center' && anchorW) x = shape.x + anchorW / 2;
+        if (hAlign === 'right' && anchorW) x = shape.x + anchorW - pad;
+        if (hAlign === 'left' && anchorW) x = shape.x + pad;
+
         for (let i = 0; i < lines.length; i++) {
-          ctx.fillText(lines[i], shape.x, shape.y + i * lineHeight);
+          ctx.fillText(lines[i], x, shape.y + i * lineHeight);
         }
         ctx.restore();
         break;
@@ -377,6 +404,32 @@ const Export = (() => {
       case 'hdinsight':    _exportHdInsight(ctx, rc, shape, opts); break;
       case 'dataexplorer': _exportDataExplorer(ctx, rc, shape, opts); break;
       case 'powerbi':      _exportPowerBi(ctx, rc, shape, opts); break;
+
+      // Kubernetes shapes
+      case 'k8spod':       _exportK8s(ctx, rc, shape, opts, 'k8spod'); break;
+      case 'k8sdeploy':    _exportK8s(ctx, rc, shape, opts, 'k8sdeploy'); break;
+      case 'k8ssvc':       _exportK8s(ctx, rc, shape, opts, 'k8ssvc'); break;
+      case 'k8sing':       _exportK8s(ctx, rc, shape, opts, 'k8sing'); break;
+      case 'k8sns':        _exportK8s(ctx, rc, shape, opts, 'k8sns'); break;
+      case 'k8scrd':       _exportK8s(ctx, rc, shape, opts, 'k8scrd'); break;
+      case 'k8scm':        _exportK8s(ctx, rc, shape, opts, 'k8scm'); break;
+      case 'k8ssecret':    _exportK8s(ctx, rc, shape, opts, 'k8ssecret'); break;
+      case 'k8spv':        _exportK8s(ctx, rc, shape, opts, 'k8spv'); break;
+      case 'k8spvc':       _exportK8s(ctx, rc, shape, opts, 'k8spvc'); break;
+      case 'k8ssc':        _exportK8s(ctx, rc, shape, opts, 'k8ssc'); break;
+      case 'k8ssts':       _exportK8s(ctx, rc, shape, opts, 'k8ssts'); break;
+      case 'k8sds':        _exportK8s(ctx, rc, shape, opts, 'k8sds'); break;
+      case 'k8srs':        _exportK8s(ctx, rc, shape, opts, 'k8srs'); break;
+      case 'k8sjob':       _exportK8s(ctx, rc, shape, opts, 'k8sjob'); break;
+      case 'k8scronjob':   _exportK8s(ctx, rc, shape, opts, 'k8scronjob'); break;
+      case 'k8shpa':       _exportK8s(ctx, rc, shape, opts, 'k8shpa'); break;
+      case 'k8ssa':        _exportK8s(ctx, rc, shape, opts, 'k8ssa'); break;
+      case 'k8srole':      _exportK8s(ctx, rc, shape, opts, 'k8srole'); break;
+      case 'k8snetpol':    _exportK8s(ctx, rc, shape, opts, 'k8snetpol'); break;
+      case 'k8sep':        _exportK8s(ctx, rc, shape, opts, 'k8sep'); break;
+      case 'k8svol':       _exportK8s(ctx, rc, shape, opts, 'k8svol'); break;
+      case 'k8slimits':    _exportK8s(ctx, rc, shape, opts, 'k8slimits'); break;
+      case 'k8squota':     _exportK8s(ctx, rc, shape, opts, 'k8squota'); break;
     }
 
     ctx.globalAlpha = 1;
@@ -400,12 +453,15 @@ const Export = (() => {
   }
 
   function _exportBaseRect(rc, shape, opts) {
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
     const { x, y, width: w, height: h } = shape;
     const r = Math.min(12, Math.min(w, h) * 0.2);
     if (shape.edgeStyle === 'round') {
-      _exportRoundedRect(rc, x, y, w, h, r, opts);
+      _exportRoundedRect(rc, x, y, w, h, r, borderOpts);
     } else {
-      rc.rectangle(x, y, w, h, opts);
+      rc.rectangle(x, y, w, h, borderOpts);
     }
   }
 
@@ -415,13 +471,21 @@ const Export = (() => {
     const fs = shape.fontSize || 16;
     ctx.font = `${fs}px ${shape.fontFamily || 'Segoe UI, system-ui, sans-serif'}`;
     ctx.fillStyle = shape.strokeColor;
-    ctx.textAlign = 'center';
+    const hAlign = shape.textHAlign || 'center';
+    ctx.textAlign = (hAlign === 'right' || hAlign === 'center' || hAlign === 'left') ? hAlign : 'center';
     ctx.textBaseline = 'top';
-    const lines = shape.text.split('\n');
+
+    const pad = 6;
+    const maxW = (shape.wordWrap && shape.width && shape.width > pad * 2) ? (shape.width - pad * 2) : null;
+    const lines = (maxW ? _exportWrapTextLines(ctx, shape.text, maxW) : shape.text.split('\n'));
     const lineHeight = fs * 1.4;
     const totalTextH = lines.length * lineHeight;
-    const cx = shape.x + shape.width / 2;
-    const pad = 6;
+
+    let x;
+    if (hAlign === 'left') x = shape.x + pad;
+    else if (hAlign === 'right') x = shape.x + shape.width - pad;
+    else x = shape.x + shape.width / 2;
+
     let startY;
     const vAlign = shape.textVAlign || 'middle';
     if (vAlign === 'top') {
@@ -432,9 +496,33 @@ const Export = (() => {
       startY = shape.y + (shape.height - totalTextH) / 2;
     }
     for (let i = 0; i < lines.length; i++) {
-      ctx.fillText(lines[i], cx, startY + i * lineHeight);
+      ctx.fillText(lines[i], x, startY + i * lineHeight);
     }
     ctx.restore();
+  }
+
+  function _exportWrapTextLines(ctx, text, maxWidth) {
+    const paragraphs = (text || '').split('\n');
+    const out = [];
+    for (const para of paragraphs) {
+      if (para.trim() === '') {
+        out.push('');
+        continue;
+      }
+      const words = para.split(/\s+/).filter(Boolean);
+      let line = '';
+      for (const w of words) {
+        const test = line ? (line + ' ' + w) : w;
+        if (!line || ctx.measureText(test).width <= maxWidth) {
+          line = test;
+        } else {
+          out.push(line);
+          line = w;
+        }
+      }
+      if (line) out.push(line);
+    }
+    return out;
   }
 
   function _exportIcon(ctx, shape, icon, color) {
@@ -449,6 +537,9 @@ const Export = (() => {
   }
 
   function _exportDatabase(ctx, rc, shape, opts) {
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
     const { x, y, width: w, height: h } = shape;
     const ry = Math.min(h * 0.15, 20);
     if (opts.fill) {
@@ -462,9 +553,9 @@ const Export = (() => {
       ctx.fill();
       ctx.restore();
     }
-    rc.ellipse(x + w / 2, y + ry, w, ry * 2, { ...opts, fill: opts.fill, fillStyle: opts.fill ? 'hachure' : undefined });
-    rc.line(x, y + ry, x, y + h - ry, opts);
-    rc.line(x + w, y + ry, x + w, y + h - ry, opts);
+    rc.ellipse(x + w / 2, y + ry, w, ry * 2, { ...borderOpts, fill: borderOpts.fill, fillStyle: borderOpts.fill ? 'hachure' : undefined });
+    rc.line(x, y + ry, x, y + h - ry, borderOpts);
+    rc.line(x + w, y + ry, x + w, y + h - ry, borderOpts);
     const steps = 30;
     for (let i = 0; i < steps; i++) {
       const a1 = (i / steps) * Math.PI;
@@ -472,7 +563,7 @@ const Export = (() => {
       rc.line(
         x + w / 2 + (w / 2) * Math.cos(a1), y + h - ry + ry * Math.sin(a1),
         x + w / 2 + (w / 2) * Math.cos(a2), y + h - ry + ry * Math.sin(a2),
-        opts
+        borderOpts
       );
     }
     _exportShapeText(ctx, shape);
@@ -535,6 +626,9 @@ const Export = (() => {
   }
 
   function _exportCloud(ctx, rc, shape, opts) {
+    const borderOpts = (shape.strokeEnabled === false)
+      ? { ...opts, stroke: 'transparent', strokeWidth: 0, strokeLineDash: undefined }
+      : opts;
     const { x, y, width: w, height: h } = shape;
     const path = [
       `M ${x + w * 0.15} ${y + h * 0.78}`,
@@ -545,7 +639,7 @@ const Export = (() => {
       `C ${x + w * 1.04} ${y + h * 0.48}, ${x + w * 1.02} ${y + h * 0.78}, ${x + w * 0.85} ${y + h * 0.78}`,
       `Z`
     ].join(' ');
-    rc.path(path, opts);
+    rc.path(path, borderOpts);
     _exportShapeText(ctx, shape);
   }
 
@@ -1110,6 +1204,9 @@ const Export = (() => {
   function _exportDataExplorer(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'dataexplorer');_exportShapeText(c,s);}
   function _exportPowerBi(c,rc,s,o){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,'powerbi');_exportShapeText(c,s);}
 
+  // === Kubernetes export renderer (generic) ===
+  function _exportK8s(c,rc,s,o,typeKey){_exportBaseRect(rc,s,o);_exportAzureIcon(c,s,typeKey);_exportShapeText(c,s);}
+
   function drawArrowHeadExport(ctx, fromX, fromY, toX, toY, color, strokeW) {
     const headLen = Math.max(12, strokeW * 4);
     const ang = Utils.angle(fromX, fromY, toX, toY);
@@ -1309,6 +1406,32 @@ const Export = (() => {
     hdinsight:     { category: 'analytics',  service: 'Azure HDInsight',            provider: 'azure', azureService: 'Microsoft.HDInsight/clusters',          description: 'Managed Hadoop / Spark clusters' },
     dataexplorer:  { category: 'analytics',  service: 'Azure Data Explorer',        provider: 'azure', azureService: 'Microsoft.Kusto/clusters',              description: 'Real-time data analytics (Kusto)' },
     powerbi:       { category: 'analytics',  service: 'Power BI',                   provider: 'azure', description: 'Business intelligence & dashboards' },
+
+    // ─── Kubernetes (CRD / K8s resources) ───────────
+    k8spod:        { category: 'compute',    service: 'Pod',                         provider: 'kubernetes', description: 'Smallest deployable unit in Kubernetes' },
+    k8sdeploy:     { category: 'compute',    service: 'Deployment',                  provider: 'kubernetes', description: 'Manages ReplicaSets and rolling updates' },
+    k8ssvc:        { category: 'network',    service: 'Service',                     provider: 'kubernetes', description: 'Stable network endpoint for pods' },
+    k8sing:        { category: 'network',    service: 'Ingress',                     provider: 'kubernetes', description: 'HTTP/HTTPS routing to services' },
+    k8sns:         { category: 'compute',    service: 'Namespace',                   provider: 'kubernetes', description: 'Virtual cluster partition' },
+    k8scrd:        { category: 'compute',    service: 'Custom Resource Definition',  provider: 'kubernetes', description: 'Extension of the Kubernetes API' },
+    k8scm:         { category: 'config',     service: 'ConfigMap',                   provider: 'kubernetes', description: 'Configuration data as key-value pairs' },
+    k8ssecret:     { category: 'security',   service: 'Secret',                      provider: 'kubernetes', description: 'Sensitive data (passwords, tokens, keys)' },
+    k8spv:         { category: 'storage',    service: 'PersistentVolume',            provider: 'kubernetes', description: 'Cluster-level storage resource' },
+    k8spvc:        { category: 'storage',    service: 'PersistentVolumeClaim',       provider: 'kubernetes', description: 'Request for storage by a pod' },
+    k8ssc:         { category: 'storage',    service: 'StorageClass',                provider: 'kubernetes', description: 'Defines storage provisioner and parameters' },
+    k8ssts:        { category: 'compute',    service: 'StatefulSet',                 provider: 'kubernetes', description: 'Manages stateful pod workloads' },
+    k8sds:         { category: 'compute',    service: 'DaemonSet',                   provider: 'kubernetes', description: 'Runs a pod on every (or selected) node' },
+    k8srs:         { category: 'compute',    service: 'ReplicaSet',                  provider: 'kubernetes', description: 'Ensures a specified number of pod replicas' },
+    k8sjob:        { category: 'compute',    service: 'Job',                         provider: 'kubernetes', description: 'Runs a task to completion' },
+    k8scronjob:    { category: 'compute',    service: 'CronJob',                     provider: 'kubernetes', description: 'Scheduled job execution (cron)' },
+    k8shpa:        { category: 'compute',    service: 'Horizontal Pod Autoscaler',   provider: 'kubernetes', description: 'Auto-scales pods based on metrics' },
+    k8ssa:         { category: 'security',   service: 'ServiceAccount',              provider: 'kubernetes', description: 'Identity for pods to access the API' },
+    k8srole:       { category: 'security',   service: 'Role',                        provider: 'kubernetes', description: 'RBAC permissions within a namespace' },
+    k8snetpol:     { category: 'network',    service: 'NetworkPolicy',               provider: 'kubernetes', description: 'Controls pod-to-pod network traffic' },
+    k8sep:         { category: 'network',    service: 'Endpoint',                    provider: 'kubernetes', description: 'Network endpoint backing a service' },
+    k8svol:        { category: 'storage',    service: 'Volume',                      provider: 'kubernetes', description: 'Ephemeral or persistent storage mount' },
+    k8slimits:     { category: 'config',     service: 'LimitRange',                  provider: 'kubernetes', description: 'Default resource limits per namespace' },
+    k8squota:      { category: 'config',     service: 'ResourceQuota',               provider: 'kubernetes', description: 'Resource consumption limits per namespace' },
   };
 
   /**
